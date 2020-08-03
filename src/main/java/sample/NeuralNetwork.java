@@ -8,6 +8,7 @@ public class NeuralNetwork {
     float[][][] weights;
     float[][][] weightCorrections;
     float[][] nodeOutputs;
+    float[][] thresholds;
     int layerCount;
     int layerNodeCount[];
     int inputCount;
@@ -32,6 +33,7 @@ public class NeuralNetwork {
         weights = new float[layerCount][][];
         weightCorrections = new float[layerCount][][];
         nodeOutputs = new float[layerCount][];
+        thresholds = new float[layerCount][];
 
         // Initialize layers
         for (int i = 0; i < layerCount; i++) {
@@ -39,9 +41,14 @@ public class NeuralNetwork {
             weights[i] = new float[layerNodeCount[i]][];
             weightCorrections[i] = new float[layerNodeCount[i]][];
             nodeOutputs[i] = new float[layerNodeCount[i]];
+            thresholds[i] = new float[layerNodeCount[i]];
 
             // Initialize nodes
             for (int j = 0; j < layerNodeCount[i]; j++) {
+                if (i != 0)
+                thresholds[i][j] = (float) ((rand.nextFloat() * 4.8 - 2.4) / layerNodeCount[i - 1]);
+                else
+                    thresholds[i][j] = (float) ((rand.nextFloat() * 4.8 - 2.4) / inputCount);
                 // Layers other than the first layer
                 if (i != 0) {
                     //Number of inputs
