@@ -81,7 +81,7 @@ public class NeuralNetwork {
                 } else
                     gradientFactor = finalOutputs[j] - nodeOutputs[i][j];
                 // Calculate gradient for that node and store it
-                gradients.insertElementAt(nodeOutputs[i][j] * gradientFactor, j);
+                gradients.insertElementAt(nodeOutputs[i][j] *(1-nodeOutputs[i][j])* gradientFactor, j);
 
                 // Weights loop(finds the weights' correction values
                 for (int k = 0; k < weights[i][j].length; k++) {
