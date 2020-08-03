@@ -11,7 +11,9 @@
       <RowConstraints />
    </rowConstraints>
    <children>
-      <Pane prefHeight="200.0" prefWidth="200.0" />
-      <Button mnemonicParsing="false" text="Button" />
+      <Pane prefHeight="200.0" prefWidth="200.0">
+         <children>
+            <Button layoutX="86.0" layoutY="121.0" mnemonicParsing="false" text="Button" />
+         </children></Pane>
    </children>
 </GridPane>

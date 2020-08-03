@@ -1,5 +1,6 @@
 package main.java.sample;
 
+import java.util.Collections;
 import java.util.Random;
 import java.util.Vector;
 
@@ -56,9 +57,9 @@ public class NeuralNetwork {
                 // First layer is connected with the input nodes
                 else {
                     weights[i][j] = new float[inputCount];
-                    for (int l = 0; l < inputCount; l++) {
-                        weights[i][j][l] = (float) ((rand.nextFloat() * 4.8 - 2.4) / inputCount);
-                        weightCorrections[i][j][l] = 0;
+                    for (int k = 0; k < inputCount; k++) {
+                        weights[i][j][k] = (float) ((rand.nextFloat() * 4.8 - 2.4) / inputCount);
+                        weightCorrections[i][j][k] = 0;
                     }
                 }
             }
@@ -66,7 +67,8 @@ public class NeuralNetwork {
     }
 
     public void backPropagate(float finalOutputs[], float inputs[]) {
-        Vector gradients = new Vector();
+        Vector oldGradients = new Vector();
+        Vector newGradients = new Vector();
         // Layers loop
         for (int i = weights.length - 1; i >= 0; i--) {
 
@@ -76,23 +78,32 @@ public class NeuralNetwork {
 
                 if (i != weights.length - 1) {
                     for (int k = 0; k < weights[i + 1][j].length; k++) {
-                        gradientFactor += weights[i + 1][k][j] * (float) gradients.get(k);
+                        gradientFactor += weights[i + 1][k][j] * (float) oldGradients.get(k);
                     }
                 } else
                     gradientFactor = finalOutputs[j] - nodeOutputs[i][j];
                 // Calculate gradient for that node and store it
-                gradients.insertElementAt(nodeOutputs[i][j] *(1-nodeOutputs[i][j])* gradientFactor, j);
+                newGradients.insertElementAt(nodeOutputs[i][j] *(1-nodeOutputs[i][j])* gradientFactor, j);
 
                 // Weights loop(finds the weights' correction values
                 for (int k = 0; k < weights[i][j].length; k++) {
                     if (i != 0)
-                        weightCorrections[i][j][k] = learningRate * (float) gradients.get(j) * nodeOutputs[i - 1][k];
+                        weightCorrections[i][j][k] = learningRate * (float) newGradients.get(j) * nodeOutputs[i - 1][k];
                     else
-                        weightCorrections[i][j][k] = learningRate * (float) gradients.get(j) * inputs[k];
+                        weightCorrections[i][j][k] = learningRate * (float) newGradients.get(j) * inputs[k];
                 }
             }
+            Collections.copy(newGradients,oldGradients);
         }
+
+        // Update weights
+        for (int i=0;i< weights.length;i++)
+            for (int j=0;j<weights[i].length;j++)
+                for(int k=0;k<weights[i][j].length;k++)
+                    weights[i][j][k] += weightCorrections[i][j][k];
     }
+
+
 
     public static void main(String[] args) {
         int layerNodes[] = new int[]{2, 3, 1};
