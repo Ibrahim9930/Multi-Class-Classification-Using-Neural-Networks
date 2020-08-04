@@ -21,6 +21,7 @@ public class App extends Application {
 //        stage.initStyle(StageStyle.UTILITY);
         scene = new Scene(loadFXML("primary"));
         stage.setScene(scene);
+        stage.setOnCloseRequest(event -> System.exit(0));
         stage.show();
     }
 

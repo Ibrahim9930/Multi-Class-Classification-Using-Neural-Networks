@@ -1,5 +1,6 @@
 org\uousef\project\ai\modules\ActivationFunction.class
 org\uousef\project\ai\PrimaryController.class
+org\uousef\project\ai\modules\CallBack.class
 org\uousef\project\ai\modules\LayerInformation.class
 org\uousef\project\ai\modules\NeuralNetwork$1.class
 org\uousef\project\ai\modules\NeuralNetwork.class

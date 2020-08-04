@@ -1,5 +1,4 @@
 package org.uousef.project.ai.modules;
-
 import java.util.*;
 import java.util.stream.DoubleStream;
 
@@ -7,8 +6,8 @@ public class NeuralNetwork {
 
     public double[][][] weights, weightCorrections;
     public double[][] thresholds, nodeOutputs;
-    double learningRate, acceptedMSE, currentMES;
-    int inputNeuronNumber;
+    public double learningRate, acceptedMSE, currentMES;
+    public int inputNeuronNumber;
     //Contains weights of hidden layers and outputs
     ArrayList<LayerInformation> layersInformation;
 
@@ -43,7 +42,7 @@ public class NeuralNetwork {
             for (nestedIndex = 0; nestedIndex < weights[index].length; nestedIndex++) {
                 previousNeuronNum = (index == 0) ? inputNeuronNumber : weights[index - 1].length;
 
-                weights[index][nestedIndex] = randomGenerator.doubles(previousNeuronNum, (-2.4 / (double) previousNeuronNum), (+2.4 / (double) previousNeuronNum) + 0.1).toArray();
+                weights[index][nestedIndex] = randomGenerator.doubles(previousNeuronNum, (-2.4 / (double) previousNeuronNum), (+2.4 / (double) previousNeuronNum)).toArray();
                 thresholds[index][nestedIndex] = (randomGenerator.nextDouble() * 4.8 - 2.4) / previousNeuronNum;
 
                 weightCorrections[index][nestedIndex] = new double[previousNeuronNum];
@@ -75,7 +74,7 @@ public class NeuralNetwork {
                 nodeOutputs[indexLayer][indexNeuron] = computeNeuronOutput(tempValue, indexLayer);
             }
             //check if its the output layer and use softmax
-            if (indexLayer + 1 == weights.length && layersInformation.get(indexLayer).activationFunction == ActivationFunction.SOFTMAX) {
+            if (false&&indexLayer + 1 == weights.length && layersInformation.get(indexLayer).activationFunction == ActivationFunction.SOFTMAX) {
                 expSum = DoubleStream.of(nodeOutputs[indexLayer]).sum();
                 for (indexNeuron = 0; indexNeuron < weights[indexLayer].length; indexNeuron++) {
                     nodeOutputs[indexLayer][indexNeuron] /= expSum;
@@ -94,7 +93,7 @@ public class NeuralNetwork {
             // Nodes loop
             for (int j = 0; j < weights[i].length; j++) {
                 double gradientFactor = 0;
-                double gradientValue = computeDerivative(0,nodeOutputs[i][j],i);
+                double gradientValue = computeDerivative(0, nodeOutputs[i][j], i);
                 if (i != weights.length - 1) {
 
                     for (int k = 0; k < weights[i + 1].length; k++) {
@@ -134,9 +133,9 @@ public class NeuralNetwork {
             case ReLU:
                 return (inputValue >= 0 ? inputValue : 0);
             case TANH:
-                return (2 / (1 + Math.exp(-2 * inputValue))) - 1.0;
+                return (2.0 / (1 + Math.exp(-2 * inputValue))) - 1.0;
             case SIGMOID:
-                return (1 / (1 + Math.exp(-1 * inputValue)));
+                return (1.0 / (1 + Math.exp(-1 * inputValue)));
             default:
                 throw new IllegalStateException("Unexpected value: " + layersInformation.get(indexLayer).activationFunction);
         }
@@ -160,8 +159,8 @@ public class NeuralNetwork {
         }
     }
 
-    public void training(double[][] inputData, double[][] outputData) {
-        int epochMax = 100, iterationsMax = 2000, epochIndex, iterationIndex;
+    public void training(double[][] inputData, double[][] outputData, CallBack updateMES) {
+        int epochMax = 100000, iterationsMax = 2000000, epochIndex, iterationIndex;
         double tempMSE;
         for (epochIndex = 0; epochIndex < epochMax; epochIndex++) {
             if (iterationsMax-- == 0) {
@@ -173,9 +172,12 @@ public class NeuralNetwork {
                 feeding(inputData[iterationIndex]);
                 backPropagate(outputData[iterationIndex], inputData[iterationIndex]);
                 tempMSE += firstStepOfMSE(outputData[iterationIndex], nodeOutputs[nodeOutputs.length - 1]);
+                System.out.println("input: " + inputData[iterationIndex][0] + ":" + inputData[iterationIndex][1] + " result: " + nodeOutputs[nodeOutputs.length - 1][0]);
             }
-            tempMSE /= (double) inputData.length;
+            tempMSE = tempMSE / (double) inputData.length;
             currentMES = tempMSE;
+            updateMES.Callback();
+            System.out.println(currentMES);
             if (Math.abs(tempMSE - acceptedMSE) < 0.00001) {
                 System.out.println("MSE");
                 return;
@@ -218,19 +220,19 @@ public class NeuralNetwork {
 
     public static void main(String[] args) {
         ArrayList<LayerInformation> information = new ArrayList<LayerInformation>();
-        information.add(new LayerInformation(3,ActivationFunction.ReLU));
-        information.add(new LayerInformation(2,ActivationFunction.ReLU));
-        NeuralNetwork nn = new NeuralNetwork(information,0.03,0.0001,2);
+        information.add(new LayerInformation(3, ActivationFunction.ReLU));
+        information.add(new LayerInformation(2, ActivationFunction.ReLU));
+        NeuralNetwork nn = new NeuralNetwork(information, 0.03, 0.0001, 2);
 //        for (int i=0;i<nn.weights.length;i++)
 //            for (int j=0;j<nn.weights[i].length;j++)
 //                for(int k=0;k<nn.weights[i][j].length;k++)
 //                {
 //                    System.out.printf("Layer: %d,Node: %d,Connections: %d\thas value:%f\n",i,j,k,nn.weights[i][j][k]);
 //                }
-        double[] inputData = new double[]{0.5,1,2};
-        double[] outputData = new double[]{1,0,1};
+        double[] inputData = new double[]{0.5, 1, 2};
+        double[] outputData = new double[]{1, 0, 1};
 
-        nn.backPropagate(outputData,inputData);
+        nn.backPropagate(outputData, inputData);
     }
 
 }

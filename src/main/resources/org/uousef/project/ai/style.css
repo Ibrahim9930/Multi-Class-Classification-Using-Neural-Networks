@@ -12,6 +12,16 @@
     -fx-pref-width: 600px;
     -fx-pref-height: 475px;
 }
+#secPane{
+    -fx-background-color: #EBEBEB;
+    -fx-background-radius: 20px;
+    -fx-pref-width: 520px;
+    -fx-pref-height: 475px;
+}
+#pathTextField
+{
+    -fx-pref-width: 200px;
+}
 .buttons
 {
     -fx-background-color: #009DC1;
@@ -22,7 +32,7 @@
 }
 .filed{
     -fx-background-color: #FDFDFD;
-    -fx-pref-height: 50px;
+    -fx-pref-height: 45px;
     -fx-pref-width: 140px;
     -fx-background-radius: 50px;
 }
