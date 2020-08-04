@@ -136,7 +136,7 @@ public class PrimaryController implements Initializable {
             Scene SecondaryScene = new Scene(secondaryParent);
 
             SecondaryController secondaryController = loader.getController();
-            secondaryController.setNeuralNetwork(new NeuralNetwork(temp, learningRate, acceptedMSE, inputNeuronNumber));
+            secondaryController.setNeuralNetwork(new NeuralNetwork(temp, learningRate, acceptedMSE, inputNeuronNumber,maxEpoch));
             System.gc();
 
             Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();

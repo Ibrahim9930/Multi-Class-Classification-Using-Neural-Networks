@@ -60,7 +60,7 @@
                      </font>
                   </Text>
                   <Button fx:id="start" mnemonicParsing="false" onAction="#start" text="Button" />
-                  <Text fx:id="MSE" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" wrappingWidth="105.13671875">
+                  <Text fx:id="MSE" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" wrappingWidth="288.13671875">
                      <font>
                         <Font size="20.0" />
                      </font>
