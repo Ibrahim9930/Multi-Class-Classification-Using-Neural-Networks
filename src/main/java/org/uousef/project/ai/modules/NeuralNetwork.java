@@ -85,7 +85,6 @@ public class NeuralNetwork {
         return true;
     }
 
-    //TODO: need some modifications to work with new Constructor
     public void backPropagate(double finalOutputs[], double inputs[]) {
         Vector oldGradients = new Vector();
         Vector newGradients = new Vector();
@@ -95,15 +94,16 @@ public class NeuralNetwork {
             // Nodes loop
             for (int j = 0; j < weights[i].length; j++) {
                 double gradientFactor = 0;
-
+                double gradientValue = computeDerivative(0,nodeOutputs[i][j],i);
                 if (i != weights.length - 1) {
                     for (int k = 0; k < weights[i + 1][j].length; k++) {
                         gradientFactor += weights[i + 1][k][j] * (double) oldGradients.get(k);
                     }
                 } else
                     gradientFactor = finalOutputs[j] - nodeOutputs[i][j];
+
                 // Calculate gradient for that node and store it
-                newGradients.insertElementAt(nodeOutputs[i][j] * (1 - nodeOutputs[i][j]) * gradientFactor, j);
+                newGradients.insertElementAt(gradientValue * gradientFactor, j);
 
                 // Weights loop(finds the weights' correction values
                 for (int k = 0; k < weights[i][j].length; k++) {
