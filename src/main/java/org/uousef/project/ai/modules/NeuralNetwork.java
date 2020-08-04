@@ -85,7 +85,6 @@ public class NeuralNetwork {
         return true;
     }
 
-    //TODO: need some modifications to work with new Constructor
     public void backPropagate(double finalOutputs[], double inputs[]) {
         Vector oldGradients = new Vector();
         Vector newGradients = new Vector();
@@ -95,15 +94,17 @@ public class NeuralNetwork {
             // Nodes loop
             for (int j = 0; j < weights[i].length; j++) {
                 double gradientFactor = 0;
-
+                double gradientValue = computeDerivative(0,nodeOutputs[i][j],i);
                 if (i != weights.length - 1) {
-                    for (int k = 0; k < weights[i + 1][j].length; k++) {
+
+                    for (int k = 0; k < weights[i + 1].length; k++) {
                         gradientFactor += weights[i + 1][k][j] * (double) oldGradients.get(k);
                     }
-                } else
+                } else {
                     gradientFactor = finalOutputs[j] - nodeOutputs[i][j];
+                }
                 // Calculate gradient for that node and store it
-                newGradients.insertElementAt(nodeOutputs[i][j] * (1 - nodeOutputs[i][j]) * gradientFactor, j);
+                newGradients.insertElementAt(gradientValue * gradientFactor, j);
 
                 // Weights loop(finds the weights' correction values
                 for (int k = 0; k < weights[i][j].length; k++) {
@@ -113,7 +114,9 @@ public class NeuralNetwork {
                         weightCorrections[i][j][k] = learningRate * (double) newGradients.get(j) * inputs[k];
                 }
             }
-            Collections.copy(newGradients, oldGradients);
+            oldGradients.clear();
+            oldGradients.addAll(newGradients);
+//            Collections.copy(oldGradients, newGradients);
         }
 
         // Update weights
@@ -212,4 +215,22 @@ public class NeuralNetwork {
         }
         return stringBuffer.toString();
     }
+
+    public static void main(String[] args) {
+        ArrayList<LayerInformation> information = new ArrayList<LayerInformation>();
+        information.add(new LayerInformation(3,ActivationFunction.ReLU));
+        information.add(new LayerInformation(2,ActivationFunction.ReLU));
+        NeuralNetwork nn = new NeuralNetwork(information,0.03,0.0001,2);
+//        for (int i=0;i<nn.weights.length;i++)
+//            for (int j=0;j<nn.weights[i].length;j++)
+//                for(int k=0;k<nn.weights[i][j].length;k++)
+//                {
+//                    System.out.printf("Layer: %d,Node: %d,Connections: %d\thas value:%f\n",i,j,k,nn.weights[i][j][k]);
+//                }
+        double[] inputData = new double[]{0.5,1,2};
+        double[] outputData = new double[]{1,0,1};
+
+        nn.backPropagate(outputData,inputData);
+    }
+
 }

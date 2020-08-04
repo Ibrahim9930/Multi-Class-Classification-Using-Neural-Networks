@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="Binary-Classification-Using-Neural-Networks" />
         <module name="aiSecondProject" />
+        <module name="ai.sec.project" />
       </profile>
     </annotationProcessing>
   </component>
