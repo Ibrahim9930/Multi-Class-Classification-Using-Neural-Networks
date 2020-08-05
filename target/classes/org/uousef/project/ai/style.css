@@ -13,7 +13,7 @@
     -fx-pref-height: 475px;
 }
 #secPane{
-    -fx-background-color: #EBEBEB;
+    /*-fx-background-color: #FFFFFF;*/
     -fx-background-radius: 20px;
     -fx-pref-width: 520px;
     -fx-pref-height: 475px;

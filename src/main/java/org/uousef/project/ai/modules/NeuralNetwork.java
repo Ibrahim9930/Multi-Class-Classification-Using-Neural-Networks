@@ -9,8 +9,9 @@ public class NeuralNetwork {
     public double[][] thresholds, nodeOutputs;
     public double learningRate, acceptedMSE, currentMES;
     public int inputNeuronNumber, epochMax;
+    public int currentEpoch;
     //Contains weights of hidden layers and outputs
-    private ArrayList<LayerInformation> layersInformation;
+    public ArrayList<LayerInformation> layersInformation;
 
     public NeuralNetwork(ArrayList<LayerInformation> layersInformation, double learningRate, double acceptedMSE, int inputNeuronNumber, int epochMax) {
         this.epochMax = epochMax;
@@ -204,8 +205,9 @@ public class NeuralNetwork {
         }
     }
 
-    public void training(double[][] inputData, double[][] outputData, CallBack updateMES) {
-        int epochIndex, iterationIndex;
+    public void training(double[][] inputData, double[][] outputData, CallBack updateMES, SeriesCallBack updateSeries,FinishLearningCallback doneLearning) {
+        int iterationIndex = 0;
+        int epochIndex = 0;
         double tempMSE;
 
         for (epochIndex = 0; epochIndex < epochMax; epochIndex++) {
@@ -214,17 +216,21 @@ public class NeuralNetwork {
                 feeding(inputData[iterationIndex]);
                 testBack(inputData[iterationIndex], outputData[iterationIndex]);
                 tempMSE += firstStepOfMSE(outputData[iterationIndex], nodeOutputs[nodeOutputs.length - 1]);
-                System.out.println("input: " + inputData[iterationIndex][0] + ":" + inputData[iterationIndex][1] + " result: " + nodeOutputs[nodeOutputs.length - 1][0]);
+                System.out.println("input: " + inputData[iterationIndex][0] + ":" + inputData[iterationIndex][1] + " result: " + nodeOutputs[nodeOutputs.length - 1][0]+"output: "+outputData[iterationIndex][0]);
+                updateSeries.SeriesCallBack(iterationIndex);
             }
             tempMSE = tempMSE / (double) inputData.length;
             currentMES = tempMSE;
+            currentEpoch = epochIndex;
             updateMES.Callback();
             System.out.println(currentMES);
             if (acceptedMSE >= tempMSE) {
                 System.out.println("MSE");
+                doneLearning.finishLearning();
                 return;
             }
         }
+        doneLearning.finishLearning();
         System.out.println("maxEpoch");
     }
 
