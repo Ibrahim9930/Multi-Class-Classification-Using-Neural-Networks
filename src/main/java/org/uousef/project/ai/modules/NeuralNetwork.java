@@ -205,27 +205,28 @@ public class NeuralNetwork {
         }
     }
 
-    public void training(double[][] inputData, double[][] outputData, CallBack updateMES, SeriesCallBack updateSeries,FinishLearningCallback doneLearning) {
+    public void training(double[][] inputData, double[][] outputData, CallBack updateMES, SeriesCallBack updateSeries,FinishLearningCallback doneLearning,ClearSeriesCallback clearSeries) {
         int iterationIndex = 0;
         int epochIndex = 0;
         double tempMSE;
 
         for (epochIndex = 0; epochIndex < epochMax; epochIndex++) {
             tempMSE = 0.0;
+            clearSeries.ClearSeriesCallback();
             for (iterationIndex = 0; iterationIndex < inputData.length; iterationIndex++) {
                 feeding(inputData[iterationIndex]);
                 testBack(inputData[iterationIndex], outputData[iterationIndex]);
                 tempMSE += firstStepOfMSE(outputData[iterationIndex], nodeOutputs[nodeOutputs.length - 1]);
-                System.out.println("input: " + inputData[iterationIndex][0] + ":" + inputData[iterationIndex][1] + " result: " + nodeOutputs[nodeOutputs.length - 1][0]+"output: "+outputData[iterationIndex][0]);
+//                System.out.println("input: " + inputData[iterationIndex][0] + ":" + inputData[iterationIndex][1] + " result: " + nodeOutputs[nodeOutputs.length - 1][0]+"output: "+outputData[iterationIndex][0]);
                 updateSeries.SeriesCallBack(iterationIndex);
             }
             tempMSE = tempMSE / (double) inputData.length;
             currentMES = tempMSE;
             currentEpoch = epochIndex;
             updateMES.Callback();
-            System.out.println(currentMES);
+//            System.out.println(currentMES);
             if (acceptedMSE >= tempMSE) {
-                System.out.println("MSE");
+//                System.out.println("MSE");
                 doneLearning.finishLearning();
                 return;
             }

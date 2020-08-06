@@ -40,6 +40,7 @@ public class SecondaryController implements Initializable {
     private XYChart.Series classAData;
     private XYChart.Series classBData;
     private XYChart.Series performanceData;
+    private XYChart.Series tempClassASeries, tempClassBSeries;
 
     void setNeuralNetwork(NeuralNetwork neuralNetwork) {
         this.neuralNetwork = neuralNetwork;
@@ -53,41 +54,44 @@ public class SecondaryController implements Initializable {
     private Label MSE;
 
     public void startTraining(ActionEvent actionEvent) {
-        XYChart.Series tempSeries = new XYChart.Series();
-        XYChart.Series tempClassASeries = new XYChart.Series();
-        XYChart.Series tempClassBSeries = new XYChart.Series();
+        tempClassASeries = new XYChart.Series();
+        tempClassBSeries = new XYChart.Series();
 
         long t = System.currentTimeMillis();
         if (!learningStarted) {
             ObservableList<XYChart.Data> classAInput = classAData.getData();
             ObservableList<XYChart.Data> classBInput = classBData.getData();
+            XYChart.Series unidentifiedSeries = new XYChart.Series();
             inputData = new double[classAInput.size() + classBInput.size()][2];
-            outputData = new double[classBInput.size() + classBInput.size()][1];
+            outputData = new double[classAInput.size() + classBInput.size()][1];
 
             for (int i = 0; i < classAInput.size() + classBInput.size(); i++) {
                 if (i < classAInput.size()) {
                     inputData[i][0] = (double) classAInput.get(i).getXValue();
                     inputData[i][1] = (double) classAInput.get(i).getYValue();
                     outputData[i][0] = 0;
-                    tempSeries.getData().add(classAInput.get(i));
+//                    tempSeries.getData().add(classAInput.get(i));
                 } else {
                     inputData[i][0] = (double) classBInput.get(i - classAInput.size()).getXValue();
                     inputData[i][1] = (double) classBInput.get(i - classAInput.size()).getYValue();
                     outputData[i][0] = 1;
-                    tempSeries.getData().add(classBInput.get(i - classAInput.size()));
+//                    tempSeries.getData().add(classBInput.get(i - classAInput.size()));
                 }
 
             }
+            unidentifiedSeries.getData().addAll(classAInput);
+            unidentifiedSeries.getData().addAll(classBInput);
             classBData.getData().clear();
             classAData.getData().clear();
-            unIdentifiedData.getData().setAll(tempSeries.getData());
+
+            unIdentifiedData.getData().setAll(unidentifiedSeries.getData());
 
             learningStarted = true;
             new Thread(() -> {
                 neuralNetwork.training(inputData, outputData, () -> Platform.runLater(() -> {
-                    MSE.setText(String.format("Current MSE: %.5f", neuralNetwork.currentMES));
-                    currentEpochLbl.setText(String.format("Current Epoch: %s", neuralNetwork.currentEpoch));
-                    performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMES));
+                            MSE.setText(String.format("Current MSE: %.5f", neuralNetwork.currentMES));
+                            currentEpochLbl.setText(String.format("Current Epoch: %s", neuralNetwork.currentEpoch));
+                            performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMES));
 //                    try{
 //                        unIdentifiedData.getData().clear();
 //                        classAData.getData().clear();
@@ -100,19 +104,35 @@ public class SecondaryController implements Initializable {
 //                    }
 //                    tempClassASeries.getData().clear();
 //                    tempClassBSeries.getData().clear();
-                }), (i) -> {
-//                    double output = neuralNetwork.nodeOutputs[neuralNetwork.layersInformation.size() - 1][0];
-//                    XYChart.Data point = new XYChart.Data(inputData[i][0], inputData[i][1]);
-//                    if (output < 0.5)
-//                        if (!tempClassASeries.getData().contains(point))
-//                            tempClassASeries.getData().add(point);
-//                        else if (!tempClassBSeries.getData().contains(point))
-//                            tempClassBSeries.getData().add(point);
+                        }), (i) -> {
+                            double output = neuralNetwork.nodeOutputs[neuralNetwork.nodeOutputs.length - 1][0];
+                            XYChart.Data point = new XYChart.Data(inputData[i][0], inputData[i][1]);
+                            if (output < 0.5) {
+                                if (!tempClassASeries.getData().contains(point)) {
+//                                    System.out.println("Adding a point to series A");
+                                    tempClassASeries.getData().add(point);
+                                }
 
-                }, () -> Platform.runLater(() -> {
-                    
-                }));
-                System.out.println(System.currentTimeMillis() - t);
+                            } else if (!tempClassBSeries.getData().contains(point)) {
+                                if (!tempClassBSeries.getData().contains(point)) {
+//                                    System.out.println("Adding a point to series B");
+                                    tempClassBSeries.getData().add(point);
+                                }
+                            }
+
+                        }, () -> Platform.runLater(()->{
+                            unIdentifiedData.getData().clear();
+                    classAData.getData().addAll(tempClassASeries.getData());
+                    classBData.getData().addAll(tempClassBSeries.getData());
+                        }), () -> {
+                            System.out.println("Clearing");
+                            tempClassASeries.getData().clear();
+                            tempClassBSeries.getData().clear();
+                        }
+                );
+                System.out.println(tempClassASeries.getData());
+                System.out.println(tempClassBSeries.getData());
+                System.out.println("Time the operation took in milliseconds : " + (System.currentTimeMillis() - t));
                 learningStarted = false;
                 System.gc();
             }).start();
@@ -198,10 +218,10 @@ public class SecondaryController implements Initializable {
     }
 
     public void addPoint(MouseEvent mouseEvent) {
-        System.out.println("X axis is :" + mouseEvent.getX());
-        System.out.println("Y axis is :" + mouseEvent.getY());
-        System.out.println("Chart width is :" + chart.getPrefWidth());
-        System.out.println("Chart height is :" + chart.getPrefHeight());
+//        System.out.println("X axis is :" + mouseEvent.getX());
+//        System.out.println("Y axis is :" + mouseEvent.getY());
+//        System.out.println("Chart width is :" + chart.getPrefWidth());
+//        System.out.println("Chart height is :" + chart.getPrefHeight());
 
         if (mouseEvent.getButton() == MouseButton.PRIMARY)
             classAData.getData().add(new XYChart.Data((mouseEvent.getX() - 36.6) / xAxis.getScale(), (mouseEvent.getY() - 353) / yAxis.getScale()));
