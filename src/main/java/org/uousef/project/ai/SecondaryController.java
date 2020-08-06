@@ -44,6 +44,7 @@ public class SecondaryController implements Initializable {
     private XYChart.Series performanceData;
     private XYChart.Series tempClassASeries, tempClassBSeries;
     private FileChooser fileChooser;
+
     void setNeuralNetwork(NeuralNetwork neuralNetwork) {
         this.neuralNetwork = neuralNetwork;
         this.learningStarted = false;
@@ -56,37 +57,45 @@ public class SecondaryController implements Initializable {
     private Label MSE;
 
     public void startTraining(ActionEvent actionEvent) {
+        //Stores new values for class A and class B before showing them on gui
         tempClassASeries = new XYChart.Series();
         tempClassBSeries = new XYChart.Series();
 
         long t = System.currentTimeMillis();
         if (!learningStarted) {
+
             ObservableList<XYChart.Data> classAInput = classAData.getData();
             ObservableList<XYChart.Data> classBInput = classBData.getData();
-            XYChart.Series unidentifiedSeries = new XYChart.Series();
+
+            XYChart.Series tempUnidentifiedSeries = new XYChart.Series();
+
+            //Learning data
             inputData = new double[classAInput.size() + classBInput.size()][2];
             outputData = new double[classAInput.size() + classBInput.size()][1];
 
+            //One loop for class A and class B data
             for (int i = 0; i < classAInput.size() + classBInput.size(); i++) {
+                //Class A data
                 if (i < classAInput.size()) {
                     inputData[i][0] = (double) classAInput.get(i).getXValue();
                     inputData[i][1] = (double) classAInput.get(i).getYValue();
                     outputData[i][0] = 0;
-//                    tempSeries.getData().add(classAInput.get(i));
-                } else {
+                }
+                //Class B data
+                else {
                     inputData[i][0] = (double) classBInput.get(i - classAInput.size()).getXValue();
                     inputData[i][1] = (double) classBInput.get(i - classAInput.size()).getYValue();
                     outputData[i][0] = 1;
-//                    tempSeries.getData().add(classBInput.get(i - classAInput.size()));
                 }
 
             }
-            unidentifiedSeries.getData().addAll(classAInput);
-            unidentifiedSeries.getData().addAll(classBInput);
+            //Convert class A and class B shapes into unidentified shapes
+            tempUnidentifiedSeries.getData().addAll(classAInput);
+            tempUnidentifiedSeries.getData().addAll(classBInput);
             classBData.getData().clear();
             classAData.getData().clear();
 
-            unIdentifiedData.getData().setAll(unidentifiedSeries.getData());
+            unIdentifiedData.getData().setAll(tempUnidentifiedSeries.getData());
 
             learningStarted = true;
             new Thread(() -> {
@@ -95,26 +104,30 @@ public class SecondaryController implements Initializable {
                             currentEpochLbl.setText(String.format("Current Epoch: %s", neuralNetwork.currentEpoch));
                             performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMES));
                         }), (i) -> {
+                            //This function classifies the input on run time but doesn't display them on the GUI
+
                             double output = neuralNetwork.nodeOutputs[neuralNetwork.nodeOutputs.length - 1][0];
                             XYChart.Data point = new XYChart.Data(inputData[i][0], inputData[i][1]);
                             if (output < 0.5) {
+                                //If statement not necessary, just to avoid duplicate exceptions
                                 if (!tempClassASeries.getData().contains(point)) {
-//                                    System.out.println("Adding a point to series A");
                                     tempClassASeries.getData().add(point);
                                 }
 
                             } else if (!tempClassBSeries.getData().contains(point)) {
                                 if (!tempClassBSeries.getData().contains(point)) {
-//                                    System.out.println("Adding a point to series B");
                                     tempClassBSeries.getData().add(point);
                                 }
                             }
 
-                        }, () -> Platform.runLater(()->{
+                        }, () -> Platform.runLater(() -> {
+                            //This function shows final classification on the GUI
+
                             unIdentifiedData.getData().clear();
-                    classAData.getData().addAll(tempClassASeries.getData());
-                    classBData.getData().addAll(tempClassBSeries.getData());
+                            classAData.getData().addAll(tempClassASeries.getData());
+                            classBData.getData().addAll(tempClassBSeries.getData());
                         }), () -> {
+                            //Clears series before each epoch
                             tempClassASeries.getData().clear();
                             tempClassBSeries.getData().clear();
                         }
@@ -210,7 +223,7 @@ public class SecondaryController implements Initializable {
 
         fileChooser = new FileChooser();
         fileChooser.setTitle("Choose a JSON file te parse the data from");
-        fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("JSON file","*.json"));
+        fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("JSON file", "*.json"));
     }
 
     public void addPoint(MouseEvent mouseEvent) {

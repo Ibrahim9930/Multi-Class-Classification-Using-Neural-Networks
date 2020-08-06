@@ -18,7 +18,6 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        stage.initStyle(StageStyle.UTILITY);
         scene = new Scene(loadFXML("primary"));
         stage.setScene(scene);
         stage.setOnCloseRequest(event -> System.exit(0));
