@@ -205,7 +205,7 @@ public class NeuralNetwork {
         }
     }
 
-    public void training(double[][] inputData, double[][] outputData, CallBack updateMES, SeriesCallBack updateSeries,FinishLearningCallback doneLearning,ClearSeriesCallback clearSeries) {
+    public void training(double[][] inputData, double[][] outputData, CallBack updateMES, SeriesCallBack updateSeries, FinishLearningCallback doneLearning, ClearSeriesCallback clearSeries) {
         int iterationIndex = 0;
         int epochIndex = 0;
         double tempMSE;
@@ -221,16 +221,22 @@ public class NeuralNetwork {
                 updateSeries.SeriesCallBack(iterationIndex);
             }
             tempMSE = tempMSE / (double) inputData.length;
+            if (Math.abs(tempMSE - currentMES) > 0.01) {
+                currentMES = tempMSE;
+                updateMES.Callback();
+            }
             currentMES = tempMSE;
             currentEpoch = epochIndex;
-            updateMES.Callback();
+
 //            System.out.println(currentMES);
             if (acceptedMSE >= tempMSE) {
 //                System.out.println("MSE");
+                updateMES.Callback();
                 doneLearning.finishLearning();
                 return;
             }
         }
+        updateMES.Callback();
         doneLearning.finishLearning();
         System.out.println("maxEpoch");
     }

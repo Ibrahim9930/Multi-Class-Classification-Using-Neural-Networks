@@ -1,6 +1,7 @@
 package org.uousef.project.ai;
 
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -23,6 +24,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import org.uousef.project.ai.modules.NeuralNetwork;
 
 public class SecondaryController implements Initializable {
@@ -41,7 +43,7 @@ public class SecondaryController implements Initializable {
     private XYChart.Series classBData;
     private XYChart.Series performanceData;
     private XYChart.Series tempClassASeries, tempClassBSeries;
-
+    private FileChooser fileChooser;
     void setNeuralNetwork(NeuralNetwork neuralNetwork) {
         this.neuralNetwork = neuralNetwork;
         this.learningStarted = false;
@@ -92,18 +94,6 @@ public class SecondaryController implements Initializable {
                             MSE.setText(String.format("Current MSE: %.5f", neuralNetwork.currentMES));
                             currentEpochLbl.setText(String.format("Current Epoch: %s", neuralNetwork.currentEpoch));
                             performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMES));
-//                    try{
-//                        unIdentifiedData.getData().clear();
-//                        classAData.getData().clear();
-//                        classBData.getData().clear();
-//                        classAData.getData().addAll(tempClassASeries.getData());
-//                        classBData.getData().addAll(tempClassBSeries.getData());
-//                    }
-//                    catch (Exception e){
-//                        System.out.println("No work");
-//                    }
-//                    tempClassASeries.getData().clear();
-//                    tempClassBSeries.getData().clear();
                         }), (i) -> {
                             double output = neuralNetwork.nodeOutputs[neuralNetwork.nodeOutputs.length - 1][0];
                             XYChart.Data point = new XYChart.Data(inputData[i][0], inputData[i][1]);
@@ -125,18 +115,20 @@ public class SecondaryController implements Initializable {
                     classAData.getData().addAll(tempClassASeries.getData());
                     classBData.getData().addAll(tempClassBSeries.getData());
                         }), () -> {
-                            System.out.println("Clearing");
                             tempClassASeries.getData().clear();
                             tempClassBSeries.getData().clear();
                         }
                 );
-                System.out.println(tempClassASeries.getData());
-                System.out.println(tempClassBSeries.getData());
                 System.out.println("Time the operation took in milliseconds : " + (System.currentTimeMillis() - t));
                 learningStarted = false;
                 System.gc();
             }).start();
         }
+    }
+
+    public void enterFileData(ActionEvent actionEvent) {
+
+        File file = fileChooser.showOpenDialog(null);
     }
 
     public static class TableData {
@@ -215,6 +207,10 @@ public class SecondaryController implements Initializable {
         confusionTable.setItems(tableData);
 
         confusionTable.getColumns().addAll(headerCol, classACol, classBCol);
+
+        fileChooser = new FileChooser();
+        fileChooser.setTitle("Choose a JSON file te parse the data from");
+        fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("JSON file","*.json"));
     }
 
     public void addPoint(MouseEvent mouseEvent) {

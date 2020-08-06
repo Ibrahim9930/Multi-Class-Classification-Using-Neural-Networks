@@ -30,7 +30,7 @@
                      <font>
                         <Font name="System Bold" size="22.0" />
                      </font></Label>
-                  <Button mnemonicParsing="false" style="-fx-background-color: #EBEBEB;" styleClass="buttons" stylesheets="@style.css" text="Select File">
+                  <Button fx:id="selectFile" mnemonicParsing="false" onAction="#enterFileData" style="-fx-background-color: #EBEBEB;" styleClass="buttons" stylesheets="@style.css" text="Select File">
                      <VBox.margin>
                         <Insets top="20.0" />
                      </VBox.margin>
