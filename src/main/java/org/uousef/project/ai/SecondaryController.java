@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.ResourceBundle;
 
+import com.jfoenix.controls.JFXButton;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -16,7 +17,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
@@ -30,6 +33,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -66,6 +70,8 @@ public class SecondaryController implements Initializable {
     private Label MSE;
     @FXML
     private Pane confusionPane;
+    @FXML
+    private JFXButton back;
 
     public void startTraining(ActionEvent actionEvent) {
         if (!learningStarted) {
@@ -321,13 +327,13 @@ public class SecondaryController implements Initializable {
     void ssss(ActionEvent event) {
         double width = confusionPane.getWidth(), height = confusionPane.getHeight();
         confusionPane.getChildren().removeIf((e) -> true);
-        double[] name = {1, 2,3};
-        int[] ac = {60, 105,100};
+        double[] name = {1, 2, 3};
+        int[] ac = {60, 105, 100};
         int[][] con =
                 {
-                        {50, 10,5},
-                        {5, 100,2},
-                        {50, 90,18},
+                        {50, 10, 5},
+                        {5, 100, 2},
+                        {50, 90, 18},
                 };
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(App.class.getResource("confusionMatrix.fxml"));
@@ -337,12 +343,31 @@ public class SecondaryController implements Initializable {
             newLoadedPane = loader.load();
             ConfusionMatrixController matrix = loader.getController();
             System.out.println(matrix);
-            matrix.setupMatrix(name, con, ac,width,height);
+            matrix.setupMatrix(name, con, ac, width, height);
             confusionPane.getChildren().add(newLoadedPane);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+    }
+
+    @FXML
+    void backHomePage(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(App.class.getResource("primary.fxml"));
+            Parent secondaryParent = loader.load();
+            Scene SecondaryScene = new Scene(secondaryParent);
+
+            PrimaryController controller = loader.getController();
+            Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            window.setScene(SecondaryScene);
+            System.gc();
+            window.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

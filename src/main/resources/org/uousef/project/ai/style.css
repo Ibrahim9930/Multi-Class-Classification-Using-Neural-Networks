@@ -40,3 +40,9 @@
     -fx-pref-width: 600px;
     -fx-pref-height: 475px;
 }
+#HBoxInner{
+    -fx-background-color: rgba(235, 235, 235,0.99);
+    -fx-background-radius: 20px;
+    /*-fx-pref-width: 600px;*/
+    /*-fx-pref-height: 475px;*/
+}
