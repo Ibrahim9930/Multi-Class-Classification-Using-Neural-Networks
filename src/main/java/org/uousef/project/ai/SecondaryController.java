@@ -14,7 +14,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
@@ -26,6 +28,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -40,7 +43,6 @@ public class SecondaryController implements Initializable {
     public ScatterChart chart;
     public NumberAxis xAxis;
     public NumberAxis yAxis;
-    public TableView<TableData> confusionTable;
     private NeuralNetwork neuralNetwork;
     private volatile boolean learningStarted;
     private XYChart.Series unIdentifiedData;
@@ -51,21 +53,24 @@ public class SecondaryController implements Initializable {
     private FileChooser fileChooser;
     private boolean dataFromGraph;
     private String fileDataJson;
+
     void setNeuralNetwork(NeuralNetwork neuralNetwork) {
         this.neuralNetwork = neuralNetwork;
         this.learningStarted = false;
     }
 
     @FXML
-    private Button start;
+    private Button start, butttton;
 
     @FXML
     private Label MSE;
+    @FXML
+    private Pane confusionPane;
 
     public void startTraining(ActionEvent actionEvent) {
         if (!learningStarted) {
             learningStarted = true;
-            if(dataFromGraph)
+            if (dataFromGraph)
                 learnWithGraphData();
             else
                 learnWithFileData();
@@ -79,7 +84,7 @@ public class SecondaryController implements Initializable {
         try {
             BufferedReader in = Files.newBufferedReader(file.toPath());
 
-            String line = null;
+            String line;
             while ((line = in.readLine()) != null) {
                 fileDataJson += line;
             }
@@ -90,7 +95,7 @@ public class SecondaryController implements Initializable {
         dataFromGraph = false;
     }
 
-    public void learnWithFileData() {
+    private void learnWithFileData() {
 
         Object obj = JSONValue.parse(fileDataJson);
         JSONArray data = (JSONArray) obj;
@@ -107,13 +112,13 @@ public class SecondaryController implements Initializable {
 
             tempInputArray = (JSONArray) tempObject.get("input");
             for (int j = 0; j < tempInputArray.size(); j++) {
-                tempValue = new Long((long) tempInputArray.get(j));
+                tempValue = (Long) tempInputArray.get(j);
                 inputData[i][j] = tempValue.doubleValue();
             }
 
             tempOutputArray = (JSONArray) tempObject.get("output");
             for (int j = 0; j < tempOutputArray.size(); j++) {
-                tempValue = new Long((long) tempOutputArray.get(j));
+                tempValue = (Long) tempOutputArray.get(j);
                 outputData[i][j] = tempValue.doubleValue();
             }
         }
@@ -144,7 +149,7 @@ public class SecondaryController implements Initializable {
         }).start();
     }
 
-    public void learnWithGraphData() {
+    private void learnWithGraphData() {
 
         //Stores new values for class A and class B before showing them on gui
         tempClassASeries = new XYChart.Series();
@@ -220,7 +225,7 @@ public class SecondaryController implements Initializable {
             );
             System.out.println("Time the operation took in milliseconds : " + (System.currentTimeMillis() - t));
             learningStarted = false;
-                System.gc();
+            System.gc();
         }).start();
 
     }
@@ -299,9 +304,6 @@ public class SecondaryController implements Initializable {
 //        classBCol.setCellValueFactory(
 //                new PropertyValueFactory<TableData, Integer>("predictedClassB")
 //        );
-        confusionTable.setItems(tableData);
-
-        confusionTable.getColumns().addAll(headerCol, classACol, classBCol);
 
         fileChooser = new FileChooser();
         fileChooser.setTitle("Choose a JSON file te parse the data from");
@@ -309,15 +311,38 @@ public class SecondaryController implements Initializable {
     }
 
     public void addPoint(MouseEvent mouseEvent) {
-//        System.out.println("X axis is :" + mouseEvent.getX());
-//        System.out.println("Y axis is :" + mouseEvent.getY());
-//        System.out.println("Chart width is :" + chart.getPrefWidth());
-//        System.out.println("Chart height is :" + chart.getPrefHeight());
-
         if (mouseEvent.getButton() == MouseButton.PRIMARY)
             classAData.getData().add(new XYChart.Data((mouseEvent.getX() - 36.6) / xAxis.getScale(), (mouseEvent.getY() - 353) / yAxis.getScale()));
         else if (mouseEvent.getButton() == MouseButton.SECONDARY)
             classBData.getData().add(new XYChart.Data((mouseEvent.getX() - 36.6) / xAxis.getScale(), (mouseEvent.getY() - 353) / yAxis.getScale()));
+    }
+
+    @FXML
+    void ssss(ActionEvent event) {
+        double width = confusionPane.getWidth(), height = confusionPane.getHeight();
+        confusionPane.getChildren().removeIf((e) -> true);
+        double[] name = {1, 2,3};
+        int[] ac = {60, 105,100};
+        int[][] con =
+                {
+                        {50, 10,5},
+                        {5, 100,2},
+                        {50, 90,18},
+                };
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(App.class.getResource("confusionMatrix.fxml"));
+        Parent newLoadedPane = null;
+
+        try {
+            newLoadedPane = loader.load();
+            ConfusionMatrixController matrix = loader.getController();
+            System.out.println(matrix);
+            matrix.setupMatrix(name, con, ac,width,height);
+            confusionPane.getChildren().add(newLoadedPane);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 
