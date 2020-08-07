@@ -10,6 +10,7 @@ public class NeuralNetwork {
     public double learningRate, acceptedMSE, currentMES;
     public int inputNeuronNumber, epochMax;
     public int currentEpoch;
+    private double[] softMaxInput;
     //Contains weights of hidden layers and outputs
     public ArrayList<LayerInformation> layersInformation;
 
@@ -19,7 +20,8 @@ public class NeuralNetwork {
         this.acceptedMSE = acceptedMSE;
         this.inputNeuronNumber = inputNeuronNumber;
         this.layersInformation = layersInformation;
-
+        softMaxInput = (layersInformation.get(layersInformation.size() - 1).activationFunction == ActivationFunction.SOFTMAX)
+                ? softMaxInput = new double[layersInformation.get(layersInformation.size() - 1).neuronNumber] : null;
         initializeNeuralNetwork();
     }
 
@@ -83,6 +85,7 @@ public class NeuralNetwork {
             }
             //check if its the output layer and use softmax
             if (indexLayer + 1 == weights.length && layersInformation.get(indexLayer).activationFunction == ActivationFunction.SOFTMAX) {
+                softMaxInput = nodeOutputs[indexLayer].clone();
                 expSum = DoubleStream.of(nodeOutputs[indexLayer]).sum();
                 for (indexNeuron = 0; indexNeuron < weights[indexLayer].length; indexNeuron++) {
                     nodeOutputs[indexLayer][indexNeuron] /= expSum;
@@ -100,15 +103,18 @@ public class NeuralNetwork {
         for (indexLayer = weights.length - 1; indexLayer >= 0; indexLayer--) {
             for (indexNode = 0; indexNode < weights[indexLayer].length; indexNode++) {
                 if (indexLayer == weights.length - 1) {
-                    error = finalOutputs[indexNode] - nodeOutputs[weights.length - 1][indexNode];
-                    gradient = error * computeDerivative(0, nodeOutputs[weights.length - 1][indexNode], weights.length - 1);
+                    error = (layersInformation.get(layersInformation.size()-1).activationFunction != ActivationFunction.SOFTMAX)
+                            ? finalOutputs[indexNode] - nodeOutputs[weights.length - 1][indexNode]
+                            : finalOutputs[indexNode] * Math.log(nodeOutputs[weights.length - 1][indexNode])/Math.log(2);
+
+                    gradient = error * computeDerivative(nodeOutputs[weights.length - 1][indexNode], weights.length - 1,indexNode);
                     gradient1.add(gradient);
                 } else {
                     gradient = 0;
                     for (indexWeight = 0; indexWeight < gradient2.size(); indexWeight++) {
                         gradient += (gradient2.get(indexWeight) * weights[indexLayer + 1][indexWeight][indexNode]);
                     }
-                    gradient *= computeDerivative(0, nodeOutputs[indexLayer][indexNode], indexLayer);
+                    gradient *= computeDerivative( nodeOutputs[indexLayer][indexNode], indexLayer,indexNode);
                     gradient1.add(gradient);
                 }
 //                thresholds[indexLayer][indexNode] += learningRate * thresholds[indexLayer][indexNode] * gradient;
@@ -139,7 +145,7 @@ public class NeuralNetwork {
             // Nodes loop
             for (int j = 0; j < weights[i].length; j++) {
                 double gradientFactor = 0;
-                double gradientValue = computeDerivative(0, nodeOutputs[i][j], i);
+                double gradientValue = computeDerivative(nodeOutputs[i][j], i,j);
                 if (i != weights.length - 1) {
 
                     for (int k = 0; k < weights[i + 1].length; k++) {
@@ -187,7 +193,7 @@ public class NeuralNetwork {
         }
     }
 
-    private double computeDerivative(double inputValue, double outputValue, int indexLayer) {
+    private double computeDerivative( double outputValue, int indexLayer,int neuronNumber) {
         switch (layersInformation.get(indexLayer).activationFunction) {
             case TANH:
                 return 1.0 - Math.pow(outputValue, 2.0);
@@ -198,8 +204,7 @@ public class NeuralNetwork {
             case LINEAR:
                 return 1.0;
             case SOFTMAX:
-                //TODO: not implemented yet
-                return Double.NaN;
+                return outputValue - this.nodeOutputs[nodeOutputs.length - 1][neuronNumber];
             default:
                 throw new IllegalStateException("Unexpected value: " + layersInformation.get(indexLayer).activationFunction);
         }

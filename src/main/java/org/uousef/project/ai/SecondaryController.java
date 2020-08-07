@@ -23,7 +23,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import org.uousef.project.ai.modules.NeuralNetwork;
 
@@ -35,7 +34,7 @@ public class SecondaryController implements Initializable {
     public ScatterChart chart;
     public NumberAxis xAxis;
     public NumberAxis yAxis;
-    public TableView confusionTable;
+    public TableView<TableData> confusionTable;
     private NeuralNetwork neuralNetwork;
     private volatile boolean learningStarted;
     private XYChart.Series unIdentifiedData;
@@ -134,7 +133,7 @@ public class SecondaryController implements Initializable {
                 );
                 System.out.println("Time the operation took in milliseconds : " + (System.currentTimeMillis() - t));
                 learningStarted = false;
-                System.gc();
+//                System.gc();
             }).start();
         }
     }
@@ -204,7 +203,7 @@ public class SecondaryController implements Initializable {
                         new TableData(new SimpleStringProperty("Class B"), 0, 0)
                 );
 
-        TableColumn headerCol = new TableColumn("Actual/Predicted");
+        TableColumn<TableData, String> headerCol = new TableColumn<>("Actual/Predicted");
         headerCol.setCellValueFactory(
                 new PropertyValueFactory<TableData, String>("className")
         );
