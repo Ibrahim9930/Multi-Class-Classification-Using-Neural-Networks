@@ -1,0 +1,12 @@
+org\uousef\project\ai\modules\ActivationFunction.class
+org\uousef\project\ai\PrimaryController.class
+module-info.class
+org\uousef\project\ai\IOException.class
+org\uousef\project\ai\modules\CallBack.class
+org\uousef\project\ai\SecondaryController$TableData.class
+org\uousef\project\ai\modules\LayerInformation.class
+org\uousef\project\ai\modules\NeuralNetwork$1.class
+org\uousef\project\ai\modules\SeriesCallBack.class
+org\uousef\project\ai\modules\NeuralNetwork.class
+org\uousef\project\ai\App.class
+org\uousef\project\ai\SecondaryController.class
