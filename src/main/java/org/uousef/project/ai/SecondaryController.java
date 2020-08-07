@@ -1,8 +1,11 @@
 package org.uousef.project.ai;
 
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ResourceBundle;
 
 import javafx.application.Platform;
@@ -24,6 +27,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONValue;
 import org.uousef.project.ai.modules.NeuralNetwork;
 
 public class SecondaryController implements Initializable {
@@ -141,6 +146,25 @@ public class SecondaryController implements Initializable {
     public void enterFileData(ActionEvent actionEvent) {
 
         File file = fileChooser.showOpenDialog(null);
+        String dataJson = "";
+        try {
+            BufferedReader in = Files.newBufferedReader(file.toPath());
+
+            String line = null;
+            while ((line = in.readLine())!=null){
+                dataJson+=line;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        Object obj = JSONValue.parse(dataJson);
+        JSONArray data = (JSONArray) obj;
+        System.out.println(data);
+        for (int i=0;i<data.size();i++)
+        {
+
+        }
     }
 
     public static class TableData {
