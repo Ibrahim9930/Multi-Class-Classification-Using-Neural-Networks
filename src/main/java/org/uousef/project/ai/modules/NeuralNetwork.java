@@ -8,7 +8,7 @@ public class NeuralNetwork {
     public double[][][] weights, weightCorrections;
     public double[][] thresholds, nodeOutputs;
     public double learningRate, acceptedMSE, currentMES;
-    public int inputNeuronNumber, epochMax;
+    public int inputNeuronNumber, outputNeuronNumber,epochMax;
     public int currentEpoch;
     private double[] softMaxInput;
     //Contains weights of hidden layers and outputs
@@ -22,6 +22,7 @@ public class NeuralNetwork {
         this.layersInformation = layersInformation;
         softMaxInput = (layersInformation.get(layersInformation.size() - 1).activationFunction == ActivationFunction.SOFTMAX)
                 ? softMaxInput = new double[layersInformation.get(layersInformation.size() - 1).neuronNumber] : null;
+        this.outputNeuronNumber = layersInformation.get(layersInformation.size()-1).neuronNumber;
         initializeNeuralNetwork();
     }
 
@@ -210,7 +211,7 @@ public class NeuralNetwork {
         }
     }
 
-    public void training(double[][] inputData, double[][] outputData, CallBack updateMES, SeriesCallBack updateSeries, CallBack doneLearning, CallBack clearSeries) {
+    public void training(double[][] inputData, double[][] outputData, CallBack updateMES, CallBack doneLearning) {
         int iterationIndex = 0;
         int epochIndex = 0;
         double tempMSE;
@@ -226,13 +227,11 @@ public class NeuralNetwork {
         }
         for (epochIndex = 0; epochIndex < epochMax; epochIndex++) {
             tempMSE = 0.0;
-            clearSeries.Callback();
             for (iterationIndex = 0; iterationIndex < inputData.length; iterationIndex++) {
                 feeding(inputData[iterationIndex]);
                 testBack(inputData[iterationIndex], outputData[iterationIndex]);
                 tempMSE += firstStepOfMSE(outputData[iterationIndex], nodeOutputs[nodeOutputs.length - 1]);
 //                System.out.println("input: " + inputData[iterationIndex][0] + ":" + inputData[iterationIndex][1] + " result: " + nodeOutputs[nodeOutputs.length - 1][0]+"output: "+outputData[iterationIndex][0]);
-                updateSeries.SeriesCallBack(iterationIndex);
             }
             tempMSE = tempMSE / (double) inputData.length;
             if (Math.abs(tempMSE - currentMES) > 0.01) {
@@ -240,6 +239,7 @@ public class NeuralNetwork {
                 updateMES.Callback();
             }
             currentMES = tempMSE;
+            System.out.println(currentMES);
             currentEpoch = epochIndex;
 
 //            System.out.println(currentMES);
