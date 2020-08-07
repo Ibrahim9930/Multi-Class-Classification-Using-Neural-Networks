@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane id="background" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="675.0" prefWidth="1200.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.uousef.project.ai.PrimaryController">
+   <children>
+      <AnchorPane id="gradient" layoutX="-24.0" layoutY="48.0" prefHeight="200.0" prefWidth="200.0" stylesheets="@style.css" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="-30.0" AnchorPane.rightAnchor="60.0" AnchorPane.topAnchor="40.0">
+         <children>
+            <Pane id="pane" fx:id="neuralNetworkPane" stylesheets="@style.css" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0">
+               <children>
+                  <Group id="group" fx:id="group" stylesheets="@style.css" />
+               </children></Pane>
+            <VBox fillWidth="false" layoutX="155.0" layoutY="55.0" prefHeight="431.0" prefWidth="467.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Classification">
+                     <font>
+                        <Font size="20.0" />
+                     </font>
+                  </Text>
+                  <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Lorem Ipsum is simply dummy text of the printing and typesetting industry." wrappingWidth="358.54486083984375">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets top="-10.0" />
+                     </VBox.margin>
+                  </Text>
+                  <Text fill="#ffb100" strokeType="OUTSIDE" strokeWidth="0.0" text="Please select input layers neurons">
+                     <VBox.margin>
+                        <Insets top="5.0" />
+                     </VBox.margin>
+                     <font>
+                        <Font size="17.0" />
+                     </font>
+                  </Text>
+                  <HBox alignment="CENTER_LEFT" fillHeight="false" prefWidth="453.0" spacing="10.0">
+                     <children>
+                        <TextField fx:id="textFieldInputNumber" promptText="Input No." styleClass="filed" stylesheets="@style.css">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                           <padding>
+                              <Insets bottom="5.0" left="10.0" right="5.0" top="5.0" />
+                           </padding>
+                        </TextField>
+                     </children>
+                  </HBox>
+                  <Text fill="#ffb100" strokeType="OUTSIDE" strokeWidth="0.0" text="Please select output layers neurons and the Activation funcation" wrappingWidth="313.84326171875">
+                     <font>
+                        <Font size="17.0" />
+                     </font>
+                  </Text>
+                  <HBox alignment="CENTER_LEFT" prefWidth="453.0" spacing="10.0">
+                     <children>
+                        <TextField fx:id="textFieldOutputNumber" promptText="Output No." styleClass="filed" stylesheets="@style.css">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                           <padding>
+                              <Insets bottom="5.0" left="10.0" right="5.0" top="5.0" />
+                           </padding>
+                        </TextField>
+                        <JFXComboBox fx:id="comboBoxOutputActivation" focusColor="#ffffff00" prefWidth="165.0" promptText="Activation Function" styleClass="filed" stylesheets="@style.css" unFocusColor="#ffffff00">
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                        </JFXComboBox>
+                     </children>
+                  </HBox>
+                  <Text fill="#ffb100" strokeType="OUTSIDE" strokeWidth="0.0" text="Learning Rate" wrappingWidth="134.9462890625">
+                     <font>
+                        <Font size="17.0" />
+                     </font>
+                  </Text>
+                  <TextField fx:id="textFieldLearningRate" promptText="Learning Rate" styleClass="filed" stylesheets="@style.css">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="5.0" left="10.0" right="5.0" top="5.0" />
+                     </padding>
+                  </TextField>
+                  <Text fill="#ffb100" strokeType="OUTSIDE" strokeWidth="0.0" text="Max Epoch and accepted MSE" wrappingWidth="238.9462890625">
+                     <font>
+                        <Font size="17.0" />
+                     </font>
+                  </Text>
+                  <HBox alignment="CENTER_LEFT" fillHeight="false" prefWidth="453.0" spacing="10.0">
+                     <children>
+                        <TextField fx:id="textFieldMaxEpoch" promptText="Output No." styleClass="filed" stylesheets="@style.css">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                           <padding>
+                              <Insets bottom="5.0" left="10.0" right="5.0" top="5.0" />
+                           </padding>
+                        </TextField>
+                        <TextField fx:id="textFieldMSE" promptText="Output No." styleClass="filed" stylesheets="@style.css">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                           <padding>
+                              <Insets bottom="5.0" left="10.0" right="5.0" top="5.0" />
+                           </padding>
+                        </TextField>
+                     </children>
+                  </HBox>
+                  <Line endX="400.0" stroke="#ffb100">
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </Line>
+                  <Text fill="#ffb100" strokeType="OUTSIDE" strokeWidth="0.0" text="Add new layer" wrappingWidth="134.9462890625">
+                     <font>
+                        <Font size="17.0" />
+                     </font>
+                  </Text>
+                  <HBox alignment="CENTER_LEFT" fillHeight="false" prefWidth="392.0" spacing="7.0">
+                     <children>
+                        <TextField fx:id="textFieldNeuronNo" promptText="Neuron No." styleClass="filed" stylesheets="@style.css">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                           <padding>
+                              <Insets bottom="5.0" left="10.0" right="5.0" top="5.0" />
+                           </padding>
+                        </TextField>
+                        <JFXComboBox fx:id="comboBoxActivationFunction" focusColor="#ffffff00" promptText="Activation Function" styleClass="filed" stylesheets="@style.css" unFocusColor="#ffffff00">
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                        </JFXComboBox>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" prefHeight="78.0" prefWidth="456.0" spacing="7.0">
+                     <children>
+                        <JFXButton fx:id="buttonAddLayerButton" onAction="#addLayer" prefHeight="31.0" prefWidth="130.0" styleClass="buttons" stylesheets="@style.css" text="Add Layer" textFill="WHITE">
+                           <font>
+                              <Font name="SansSerif Regular" size="15.0" />
+                           </font>
+                        </JFXButton>
+                        <JFXButton fx:id="buttonRemoveLayer" onAction="#removeLayer" prefHeight="31.0" prefWidth="127.0" styleClass="buttons" stylesheets="@style.css" text="Remove Layer" textFill="WHITE">
+                           <font>
+                              <Font name="SansSerif Regular" size="15.0" />
+                           </font>
+                        </JFXButton>
+                        <JFXButton fx:id="buttonChooseDataset" onAction="#chooseDatasetPage" prefHeight="31.0" prefWidth="130.0" styleClass="buttons" stylesheets="@style.css" text="Dataset Selection" textFill="WHITE">
+                           <font>
+                              <Font name="SansSerif Regular" size="15.0" />
+                           </font>
+                        </JFXButton>
+                     </children>
+                  </HBox>
+               </children>
+               <padding>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+               </padding>
+            </VBox>
+         </children></AnchorPane>
+   </children>
+</AnchorPane>

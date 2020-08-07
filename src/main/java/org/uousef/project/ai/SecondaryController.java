@@ -28,6 +28,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.uousef.project.ai.modules.NeuralNetwork;
 
@@ -48,7 +49,8 @@ public class SecondaryController implements Initializable {
     private XYChart.Series performanceData;
     private XYChart.Series tempClassASeries, tempClassBSeries;
     private FileChooser fileChooser;
-
+    private boolean dataFromGraph;
+    private String fileDataJson;
     void setNeuralNetwork(NeuralNetwork neuralNetwork) {
         this.neuralNetwork = neuralNetwork;
         this.learningStarted = false;
@@ -61,110 +63,166 @@ public class SecondaryController implements Initializable {
     private Label MSE;
 
     public void startTraining(ActionEvent actionEvent) {
-        //Stores new values for class A and class B before showing them on gui
-        tempClassASeries = new XYChart.Series();
-        tempClassBSeries = new XYChart.Series();
-
-        long t = System.currentTimeMillis();
         if (!learningStarted) {
-
-            ObservableList<XYChart.Data> classAInput = classAData.getData();
-            ObservableList<XYChart.Data> classBInput = classBData.getData();
-
-            XYChart.Series tempUnidentifiedSeries = new XYChart.Series();
-
-            //Learning data
-            inputData = new double[classAInput.size() + classBInput.size()][2];
-            outputData = new double[classAInput.size() + classBInput.size()][1];
-
-            //One loop for class A and class B data
-            for (int i = 0; i < classAInput.size() + classBInput.size(); i++) {
-                //Class A data
-                if (i < classAInput.size()) {
-                    inputData[i][0] = (double) classAInput.get(i).getXValue();
-                    inputData[i][1] = (double) classAInput.get(i).getYValue();
-                    outputData[i][0] = 0;
-                }
-                //Class B data
-                else {
-                    inputData[i][0] = (double) classBInput.get(i - classAInput.size()).getXValue();
-                    inputData[i][1] = (double) classBInput.get(i - classAInput.size()).getYValue();
-                    outputData[i][0] = 1;
-                }
-
-            }
-            //Convert class A and class B shapes into unidentified shapes
-            tempUnidentifiedSeries.getData().addAll(classAInput);
-            tempUnidentifiedSeries.getData().addAll(classBInput);
-            classBData.getData().clear();
-            classAData.getData().clear();
-
-            unIdentifiedData.getData().setAll(tempUnidentifiedSeries.getData());
-
             learningStarted = true;
-            new Thread(() -> {
-                neuralNetwork.training(inputData, outputData, () -> Platform.runLater(() -> {
-                            MSE.setText(String.format("Current MSE: %.5f", neuralNetwork.currentMES));
-                            currentEpochLbl.setText(String.format("Current Epoch: %s", neuralNetwork.currentEpoch));
-                            performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMES));
-                        }), (i) -> {
-                            //This function classifies the input on run time but doesn't display them on the GUI
-
-                            double output = neuralNetwork.nodeOutputs[neuralNetwork.nodeOutputs.length - 1][0];
-                            XYChart.Data point = new XYChart.Data(inputData[i][0], inputData[i][1]);
-                            if (output < 0.5) {
-                                //If statement not necessary, just to avoid duplicate exceptions
-                                if (!tempClassASeries.getData().contains(point)) {
-                                    tempClassASeries.getData().add(point);
-                                }
-
-                            } else if (!tempClassBSeries.getData().contains(point)) {
-                                if (!tempClassBSeries.getData().contains(point)) {
-                                    tempClassBSeries.getData().add(point);
-                                }
-                            }
-
-                        }, () -> Platform.runLater(() -> {
-                            //This function shows final classification on the GUI
-
-                            unIdentifiedData.getData().clear();
-                            classAData.getData().addAll(tempClassASeries.getData());
-                            classBData.getData().addAll(tempClassBSeries.getData());
-                        }), () -> {
-                            //Clears series before each epoch
-                            tempClassASeries.getData().clear();
-                            tempClassBSeries.getData().clear();
-                        }
-                );
-                System.out.println("Time the operation took in milliseconds : " + (System.currentTimeMillis() - t));
-                learningStarted = false;
-//                System.gc();
-            }).start();
+            if(dataFromGraph)
+                learnWithGraphData();
+            else
+                learnWithFileData();
         }
     }
 
     public void enterFileData(ActionEvent actionEvent) {
 
         File file = fileChooser.showOpenDialog(null);
-        String dataJson = "";
+        fileDataJson = "";
         try {
             BufferedReader in = Files.newBufferedReader(file.toPath());
 
             String line = null;
-            while ((line = in.readLine())!=null){
-                dataJson+=line;
+            while ((line = in.readLine()) != null) {
+                fileDataJson += line;
             }
         } catch (IOException e) {
             e.printStackTrace();
             return;
         }
-        Object obj = JSONValue.parse(dataJson);
+        dataFromGraph = false;
+    }
+
+    public void learnWithFileData() {
+
+        Object obj = JSONValue.parse(fileDataJson);
         JSONArray data = (JSONArray) obj;
-        System.out.println(data);
-        for (int i=0;i<data.size();i++)
-        {
+
+        JSONObject tempObject = (JSONObject) data.get(0);
+        JSONArray tempInputArray = (JSONArray) tempObject.get("input");
+        JSONArray tempOutputArray = (JSONArray) tempObject.get("output");
+        inputData = new double[data.size()][tempInputArray.size()];
+        outputData = new double[data.size()][tempOutputArray.size()];
+
+        for (int i = 0; i < data.size(); i++) {
+            tempObject = (JSONObject) data.get(i);
+            Long tempValue;
+
+            tempInputArray = (JSONArray) tempObject.get("input");
+            for (int j = 0; j < tempInputArray.size(); j++) {
+                tempValue = new Long((long) tempInputArray.get(j));
+                inputData[i][j] = tempValue.doubleValue();
+            }
+
+            tempOutputArray = (JSONArray) tempObject.get("output");
+            for (int j = 0; j < tempOutputArray.size(); j++) {
+                tempValue = new Long((long) tempOutputArray.get(j));
+                outputData[i][j] = tempValue.doubleValue();
+            }
+        }
+        for (int i = 0; i < inputData.length; i++) {
+            System.out.println();
+            for (int j = 0; j < inputData[i].length; j++)
+                System.out.print(inputData[i][j] + "\t");
+        }
+        for (int i = 0; i < outputData.length; i++) {
+            System.out.println();
+            for (int j = 0; j < outputData[i].length; j++)
+                System.out.print(outputData[i][j] + "\t");
+        }
+        long t = System.currentTimeMillis();
+        new Thread(() -> {
+            neuralNetwork.training(inputData, outputData, () -> Platform.runLater(() -> {
+                        MSE.setText(String.format("Current MSE: %.5f", neuralNetwork.currentMES));
+                        currentEpochLbl.setText(String.format("Current Epoch: %s", neuralNetwork.currentEpoch));
+                        performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMES));
+                    }), (i) -> {
+                    }, () -> {
+                    }, () -> {
+                    }
+            );
+            System.out.println("Time the operation took in milliseconds : " + (System.currentTimeMillis() - t));
+            learningStarted = false;
+            System.gc();
+        }).start();
+    }
+
+    public void learnWithGraphData() {
+
+        //Stores new values for class A and class B before showing them on gui
+        tempClassASeries = new XYChart.Series();
+        tempClassBSeries = new XYChart.Series();
+
+        ObservableList<XYChart.Data> classAInput = classAData.getData();
+        ObservableList<XYChart.Data> classBInput = classBData.getData();
+
+        XYChart.Series tempUnidentifiedSeries = new XYChart.Series();
+
+        //Learning data
+        inputData = new double[classAInput.size() + classBInput.size()][2];
+        outputData = new double[classAInput.size() + classBInput.size()][1];
+
+        //One loop for class A and class B data
+        for (int i = 0; i < classAInput.size() + classBInput.size(); i++) {
+            //Class A data
+            if (i < classAInput.size()) {
+                inputData[i][0] = (double) classAInput.get(i).getXValue();
+                inputData[i][1] = (double) classAInput.get(i).getYValue();
+                outputData[i][0] = 0;
+            }
+            //Class B data
+            else {
+                inputData[i][0] = (double) classBInput.get(i - classAInput.size()).getXValue();
+                inputData[i][1] = (double) classBInput.get(i - classAInput.size()).getYValue();
+                outputData[i][0] = 1;
+            }
 
         }
+        //Convert class A and class B shapes into unidentified shapes
+        tempUnidentifiedSeries.getData().addAll(classAInput);
+        tempUnidentifiedSeries.getData().addAll(classBInput);
+        classBData.getData().clear();
+        classAData.getData().clear();
+
+        unIdentifiedData.getData().setAll(tempUnidentifiedSeries.getData());
+
+        long t = System.currentTimeMillis();
+        new Thread(() -> {
+            neuralNetwork.training(inputData, outputData, () -> Platform.runLater(() -> {
+                        MSE.setText(String.format("Current MSE: %.5f", neuralNetwork.currentMES));
+                        currentEpochLbl.setText(String.format("Current Epoch: %s", neuralNetwork.currentEpoch));
+                        performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMES));
+                    }), (i) -> {
+                        //This function classifies the input on run time but doesn't display them on the GUI
+
+                        double output = neuralNetwork.nodeOutputs[neuralNetwork.nodeOutputs.length - 1][0];
+                        XYChart.Data point = new XYChart.Data(inputData[i][0], inputData[i][1]);
+                        if (output < 0.5) {
+                            //If statement not necessary, just to avoid duplicate exceptions
+                            if (!tempClassASeries.getData().contains(point)) {
+                                tempClassASeries.getData().add(point);
+                            }
+
+                        } else if (!tempClassBSeries.getData().contains(point)) {
+                            if (!tempClassBSeries.getData().contains(point)) {
+                                tempClassBSeries.getData().add(point);
+                            }
+                        }
+
+                    }, () -> Platform.runLater(() -> {
+                        //This function shows final classification on the GUI
+
+                        unIdentifiedData.getData().clear();
+                        classAData.getData().addAll(tempClassASeries.getData());
+                        classBData.getData().addAll(tempClassBSeries.getData());
+                    }), () -> {
+                        //Clears series before each epoch
+                        tempClassASeries.getData().clear();
+                        tempClassBSeries.getData().clear();
+                    }
+            );
+            System.out.println("Time the operation took in milliseconds : " + (System.currentTimeMillis() - t));
+            learningStarted = false;
+                System.gc();
+        }).start();
+
     }
 
     public static class TableData {
@@ -209,6 +267,7 @@ public class SecondaryController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        dataFromGraph = true;
         unIdentifiedData = new XYChart.Series();
 //        unIdentifiedData.setName("Unidentified");
         classAData = new XYChart.Series();

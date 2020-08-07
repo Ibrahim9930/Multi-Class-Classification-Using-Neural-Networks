@@ -214,7 +214,16 @@ public class NeuralNetwork {
         int iterationIndex = 0;
         int epochIndex = 0;
         double tempMSE;
-
+        for (int i = 0; i < inputData.length; i++) {
+            System.out.println();
+            for (int j = 0; j < inputData[i].length; j++)
+                System.out.print(inputData[i][j] + "\t");
+        }
+        for (int i = 0; i < outputData.length; i++) {
+            System.out.println();
+            for (int j = 0; j < outputData[i].length; j++)
+                System.out.print(outputData[i][j] + "\t");
+        }
         for (epochIndex = 0; epochIndex < epochMax; epochIndex++) {
             tempMSE = 0.0;
             clearSeries.Callback();
