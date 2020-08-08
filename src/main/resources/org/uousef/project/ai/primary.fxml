@@ -94,7 +94,7 @@
                               <Insets bottom="5.0" left="10.0" right="5.0" top="5.0" />
                            </padding>
                         </TextField>
-                        <JFXCheckBox fx:id="adaptiveLearning" checkedColor="#ffb100" onAction="#adaptiveLearningChanged" text="Adaptive learning rate" textFill="WHITE" unCheckedColor="WHITE" />
+                        <JFXCheckBox fx:id="adaptiveLearning" checkedColor="#ffb100" onAction="#adaptiveLearningChanged" text="Adaptive learning rate" textFill="#ffb100" unCheckedColor="WHITE" />
                      </children>
                   </HBox>
                   <Text fill="#ffb100" strokeType="OUTSIDE" strokeWidth="0.0" text="Max Epoch and accepted MSE" wrappingWidth="238.9462890625">
