@@ -12,8 +12,6 @@ import java.util.ResourceBundle;
 
 import com.jfoenix.controls.JFXButton;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -27,12 +25,12 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.json.simple.JSONArray;
@@ -53,46 +51,25 @@ public class SecondaryController implements Initializable {
     public Label currentEpochLbl;
     public LineChart performanceChart;
     public ComboBox classSelection;
-    private double[][] inputData, outputData;
+    public Text trainText;
     public ScatterChart chart;
     public NumberAxis xAxis;
     public NumberAxis yAxis;
-    private NeuralNetwork neuralNetwork;
-    private volatile boolean learningStarted;
-    private XYChart.Series unIdentifiedData;
-    private ArrayList<XYChart.Series> classes, tempClasses;
-    private XYChart.Series classAData;
-    private XYChart.Series classBData;
-    private XYChart.Series performanceData;
-    private XYChart.Series tempClassASeries, tempClassBSeries;
     private FileChooser fileChooser;
-    private boolean dataFromGraph;
+
     private String fileDataJson;
-    private int chosenClass;
+
+    private NeuralNetwork neuralNetwork;
     private int inputsCount;
+    private volatile boolean startedLearning;
+    private boolean doneTraining;
 
+    private double[][] inputData, outputData;
+    private ArrayList<XYChart.Series> classes;
+    private XYChart.Series unIdentifiedData;
+    private boolean dataFromGraph;
 
-    void setNeuralNetwork(NeuralNetwork neuralNetwork) {
-        this.neuralNetwork = neuralNetwork;
-        this.learningStarted = false;
-
-        classes = new ArrayList<XYChart.Series>();
-
-        int outputsCount = neuralNetwork.outputNeuronNumber == 1 ? 2 : neuralNetwork.outputNeuronNumber;
-        for (int i = 0; i < outputsCount; i++) {
-            classes.add(new XYChart.Series());
-            chart.getData().add(classes.get(i));
-            char classChar = 'A';
-            classChar += i;
-            classSelection.getItems().add(new ClassItem("Class" + classChar, symbolPathes[i], i));
-        }
-        classSelection.setValue(classSelection.getItems().get(0));
-        System.out.println("Classes number is :" + classes.size());
-
-    }
-
-    @FXML
-    private Button start, butttton;
+    private XYChart.Series performanceData;
 
     @FXML
     private Label MSE;
@@ -101,14 +78,100 @@ public class SecondaryController implements Initializable {
     @FXML
     private JFXButton back;
 
-    public void startTraining(ActionEvent actionEvent) {
-        if (!learningStarted) {
-            learningStarted = true;
-            if (dataFromGraph)
-                learnWithGraphData();
-            else
-                learnWithFileData();
+    class ClassItem {
+        public String className;
+        public String symbolPath;
+        public Image classSymbol;
+        public int index;
+
+        public ClassItem(String className, String symbolPath, int index) {
+            this.className = className;
+            this.symbolPath = symbolPath;
+            this.index = index;
+            File file = new File(symbolPath);
+            try {
+                this.classSymbol = new Image(file.toURI().toURL().toString());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        dataFromGraph = true;
+        unIdentifiedData = new XYChart.Series();
+        chart.getData().add(unIdentifiedData);
+
+        performanceData = new XYChart.Series();
+        performanceChart.getData().add(performanceData);
+
+        fileChooser = new FileChooser();
+        fileChooser.setTitle("Choose a JSON file te parse the data from");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON file", "*.json"));
+//        fileChooser.setInitialDirectory(new File(""));
+
+        classSelection.setCellFactory(lv -> new ListCell<ClassItem>() {
+            @Override
+            protected void updateItem(ClassItem item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item != null) {
+                    if (item.classSymbol != null) {
+                        ImageView imageView = new ImageView(item.classSymbol);
+                        imageView.setFitHeight(20);
+                        imageView.setFitWidth(20);
+                        setGraphic(imageView);
+                    }
+                    setText(item.className);
+                }
+
+
+            }
+        });
+        classSelection.setButtonCell(new ListCell<ClassItem>() {
+            @Override
+            protected void updateItem(ClassItem item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item != null) {
+                    if (item.classSymbol != null) {
+                        ImageView imageView = new ImageView(item.classSymbol);
+                        imageView.setFitHeight(20);
+                        imageView.setFitWidth(20);
+                        setGraphic(imageView);
+                    }
+                    setText(item.className);
+                }
+            }
+        });
+    }
+
+    void setNeuralNetwork(NeuralNetwork neuralNetwork) {
+        this.neuralNetwork = neuralNetwork;
+        this.startedLearning = false;
+        this.doneTraining = false;
+
+        // Can't enter data from graph
+        if(neuralNetwork.inputNeuronNumber != 2){
+            chart.setVisible(false);
+            classSelection.setVisible(false);
+            dataFromGraph = false;
+            trainText.setText("Upload the training data set using a JSON file");
+            return;
+        }
+
+        //Initialize points classes
+        classes = new ArrayList<XYChart.Series>();
+        int outputsCount = neuralNetwork.outputNeuronNumber == 1 ? 2 : neuralNetwork.outputNeuronNumber;
+        for (int i = 0; i < outputsCount; i++) {
+            classes.add(new XYChart.Series());
+            chart.getData().add(classes.get(i));
+            char classChar = 'A';
+            classChar += i;
+            classSelection.getItems().add(new ClassItem("Class" + classChar, symbolPathes[i], i));
+        }
+
+        //Initial value for the class selection is class 1(square)
+        classSelection.setValue(classSelection.getItems().get(0));
     }
 
     public void enterFileData(ActionEvent actionEvent) {
@@ -127,6 +190,18 @@ public class SecondaryController implements Initializable {
             return;
         }
         dataFromGraph = false;
+        chart.setOpacity(0.5);
+        classSelection.setDisable(true);
+    }
+
+    public void startTraining(ActionEvent actionEvent) {
+        if (!startedLearning) {
+            startedLearning = true;
+            if (dataFromGraph)
+                learnWithGraphData();
+            else
+                learnWithFileData();
+        }
     }
 
     private void learnWithFileData() {
@@ -176,28 +251,24 @@ public class SecondaryController implements Initializable {
                     }
             );
             System.out.println("Time the operation took in milliseconds : " + (System.currentTimeMillis() - t));
-            learningStarted = false;
+            startedLearning = false;
             System.gc();
         }).start();
     }
 
     private void learnWithGraphData() {
 
-        tempClasses = new ArrayList<XYChart.Series>();
-
-        int outputsCount = neuralNetwork.outputNeuronNumber == 1 ? 2 : neuralNetwork.outputNeuronNumber;
-        for (int i = 0; i < outputsCount; i++)
-            tempClasses.add(new XYChart.Series());
-        System.out.println("Temp size is: " + tempClasses.size());
-
         XYChart.Series tempUnidentifiedSeries = new XYChart.Series();
 
+        int outputsCount = neuralNetwork.outputNeuronNumber == 1 ? 2 : neuralNetwork.outputNeuronNumber;
+
         //Learning data
-        System.out.println("Inputs counts is: " + inputsCount);
         inputData = new double[inputsCount][2];
         outputData = new double[inputsCount][neuralNetwork.outputNeuronNumber];
 
+        //Perceptron
         if (neuralNetwork.outputNeuronNumber == 1) {
+
             for (int i = 0; i < inputsCount; i++) {
                 ObservableList<XYChart.Data> classASeries = classes.get(0).getData();
                 ObservableList<XYChart.Data> classBSeries = classes.get(1).getData();
@@ -244,152 +315,105 @@ public class SecondaryController implements Initializable {
                         performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMES));
                     }), () -> Platform.runLater(() -> {
                         //This function shows final classification on the GUI
-
+                        int[][] confusionMatrix = new int[outputsCount][];
+                        for (int i = 0; i < confusionMatrix.length; i++)
+                            confusionMatrix[i] = new int[outputsCount];
+                        int row;
+                        int col;
+                        int[] classesCount = new int[outputsCount];
                         unIdentifiedData.getData().clear();
+
                         for (int i = 0; i < inputsCount; i++) {
                             double[] predictedOutputs = neuralNetwork.predict(inputData[i]);
                             XYChart.Data point = new XYChart.Data(inputData[i][0], inputData[i][1]);
 
+                            row = -1;
+                            col = -1;
                             //Perceptron
                             if (neuralNetwork.outputNeuronNumber == 1) {
-                                double output = predictedOutputs[0];
-                                if (output < 0.5) {
+                                double predictedOutput = predictedOutputs[0];
+                                double actualOutput = outputData[i][0];
+
+                                if (predictedOutput < 0.5) {
                                     classes.get(0).getData().add(point);
+                                    col = 0;
                                 } else {
                                     classes.get(1).getData().add(point);
+                                    col = 1;
                                 }
+                                if (actualOutput < 0.5) {
+                                    row = 0;
+                                    classesCount[0]++;
+                                } else {
+                                    row = 1;
+                                    classesCount[1]++;
+                                }
+                                confusionMatrix[row][col]++;
                             }
                             //Multiple output nodes
                             else {
-                                int maxIndex = 0;
+                                int maxIndex = -1;
                                 double maxValue = Double.MIN_VALUE;
                                 for (int j = 0; j < predictedOutputs.length; j++) {
                                     double currentValue = predictedOutputs[j];
+                                    System.out.println("current value is: "+currentValue);
                                     if (currentValue > maxValue) {
                                         maxValue = currentValue;
                                         maxIndex = j;
                                     }
                                 }
-                                classes.get(maxIndex).getData().add(point);
+//                                classes.get(maxIndex).getData().add(point);
+                                col = maxIndex;
+                                maxIndex = -1;
+                                maxValue = Double.MIN_VALUE;
+                                for (int j = 0; j < outputData[i].length; j++) {
+                                    double currentValue = outputData[i][j];
+                                    if (currentValue > maxValue) {
+                                        maxValue = currentValue;
+                                        maxIndex = j;
+                                    }
+                                }
+                                row = maxIndex;
+                                classesCount[maxIndex]++;
+                                confusionMatrix[row][col]++;
                             }
+
                         }
+                        double width = confusionPane.getWidth(), height = confusionPane.getHeight();
+                        confusionPane.getChildren().removeIf((e) -> true);
+                        double[] name = new double[outputsCount];
+                        for (int i=0;i< name.length;i++)
+                        {
+                            name[i] = i;
+                        }
+
+                        FXMLLoader loader = new FXMLLoader();
+                        loader.setLocation(App.class.getResource("confusionMatrix.fxml"));
+                        Parent newLoadedPane = null;
+
+                        try {
+                            newLoadedPane = loader.load();
+                            ConfusionMatrixController matrix = loader.getController();
+                            System.out.println(matrix);
+                            matrix.setupMatrix(name, confusionMatrix, classesCount, width, height);
+                            confusionPane.getChildren().add(newLoadedPane);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        doneTraining = true;
                     })
             );
             System.out.println("Time the operation took in milliseconds : " + (System.currentTimeMillis() - t));
-            learningStarted = false;
+            startedLearning = false;
             System.gc();
         }).start();
 
     }
 
-    public static class TableData {
-        private SimpleStringProperty className;
-        private int predictedClassA;
-        private int predictedClassB;
-
-        public TableData(SimpleStringProperty className, int predictedClassA, int predictedClassB) {
-            this.className = className;
-            this.predictedClassA = predictedClassA;
-            this.predictedClassB = predictedClassB;
-        }
-
-        public String getClassName() {
-            return className.get();
-        }
-
-        public SimpleStringProperty classNameProperty() {
-            return className;
-        }
-
-        public void setClassName(String className) {
-            this.className.set(className);
-        }
-
-        public int getPredictedClassA() {
-            return predictedClassA;
-        }
-
-        public void setPredictedClassA(int predictedClassA) {
-            this.predictedClassA = predictedClassA;
-        }
-
-        public int getPredictedClassB() {
-            return predictedClassB;
-        }
-
-        public void setPredictedClassB(int predictedClassB) {
-            this.predictedClassB = predictedClassB;
-        }
-    }
-
-    class ClassItem {
-        public String className;
-        public String symbolPath;
-        public Image classSymbol;
-        public int index;
-
-        public ClassItem(String className, String symbolPath, int index) {
-            this.className = className;
-            this.symbolPath = symbolPath;
-            this.index = index;
-            File file = new File(symbolPath);
-            try {
-                this.classSymbol = new Image(file.toURI().toURL().toString());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        dataFromGraph = true;
-
-        unIdentifiedData = new XYChart.Series();
-        chart.getData().add(unIdentifiedData);
-
-        performanceData = new XYChart.Series();
-        performanceChart.getData().add(performanceData);
-
-        fileChooser = new FileChooser();
-        fileChooser.setTitle("Choose a JSON file te parse the data from");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON file", "*.json"));
-        fileChooser.setInitialDirectory(new File(""));
-        classSelection.setCellFactory(lv -> new ListCell<ClassItem>() {
-            @Override
-            protected void updateItem(ClassItem item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item != null) {
-                    if (item.classSymbol != null) {
-                        ImageView imageView = new ImageView(item.classSymbol);
-                        imageView.setFitHeight(20);
-                        imageView.setFitWidth(20);
-                        setGraphic(imageView);
-                    }
-                    setText(item.className);
-                }
-
-
-            }
-        });
-        classSelection.setButtonCell(new ListCell<ClassItem>() {
-            @Override
-            protected void updateItem(ClassItem item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item != null) {
-                    if (item.classSymbol != null) {
-                        ImageView imageView = new ImageView(item.classSymbol);
-                        imageView.setFitHeight(20);
-                        imageView.setFitWidth(20);
-                        setGraphic(imageView);
-                    }
-                    setText(item.className);
-                }
-            }
-        });
-    }
 
     public void addPoint(MouseEvent mouseEvent) {
+        if(!dataFromGraph)
+            return;
 //        System.out.println("X axis is :" + mouseEvent.getX());
 //        System.out.println("Y axis is :" + mouseEvent.getY());
 //        System.out.println("Chart width is :" + chart.getPrefWidth());
