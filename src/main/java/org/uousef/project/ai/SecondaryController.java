@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-import com.jfoenix.controls.JFXButton;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -39,7 +38,7 @@ import org.json.simple.JSONValue;
 import org.uousef.project.ai.modules.NeuralNetwork;
 
 public class SecondaryController implements Initializable {
-    public static String[] symbolPathes = new String[]{
+    private static String[] symbolPathes = new String[]{
             "src/main/resources/org/uousef/project/ai/symbol_images/classa.PNG",
             "src/main/resources/org/uousef/project/ai/symbol_images/classb.PNG",
             "src/main/resources/org/uousef/project/ai/symbol_images/classc.PNG",
@@ -48,102 +47,35 @@ public class SecondaryController implements Initializable {
             "src/main/resources/org/uousef/project/ai/symbol_images/classf.PNG",
             "src/main/resources/org/uousef/project/ai/symbol_images/classg.PNG",
     };
-    public Label currentEpochLbl;
-    public LineChart performanceChart;
-    public ComboBox classSelection;
-    public Text trainText;
-    public ScatterChart chart;
-    public NumberAxis xAxis;
-    public NumberAxis yAxis;
-    private FileChooser fileChooser;
-
-    private String fileDataJson;
-
-    private NeuralNetwork neuralNetwork;
-    private int inputsCount;
-    private volatile boolean startedLearning;
-    private boolean doneTraining;
-
-    private double[][] inputData, outputData;
-    private ArrayList<XYChart.Series> classes;
-    private XYChart.Series unIdentifiedData;
-    private boolean dataFromGraph;
-
-    private XYChart.Series performanceData;
-
     @FXML
-    private Label MSE;
+    private LineChart performanceChart;
+    @FXML
+    private ComboBox classSelection;
+    @FXML
+    private Text trainText;
+    @FXML
+    private ScatterChart chart;
+    @FXML
+    private NumberAxis xAxis;
+    @FXML
+    private NumberAxis yAxis;
+    @FXML
+    private FileChooser fileChooser;
+    @FXML
+    private Label MSE, currentEpochLbl;
     @FXML
     private Pane confusionPane;
-    @FXML
-    private JFXButton back;
 
-    class ClassItem {
-        public String className;
-        public String symbolPath;
-        public Image classSymbol;
-        public int index;
+    private NeuralNetwork neuralNetwork;
+    private double[][] inputData, outputData;
+    private volatile boolean startedLearning;
+    private int inputsCount;
+    private boolean doneTraining;
 
-        public ClassItem(String className, String symbolPath, int index) {
-            this.className = className;
-            this.symbolPath = symbolPath;
-            this.index = index;
-            File file = new File(symbolPath);
-            try {
-                this.classSymbol = new Image(file.toURI().toURL().toString());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        dataFromGraph = true;
-        unIdentifiedData = new XYChart.Series();
-        chart.getData().add(unIdentifiedData);
-
-        performanceData = new XYChart.Series();
-        performanceChart.getData().add(performanceData);
-
-        fileChooser = new FileChooser();
-        fileChooser.setTitle("Choose a JSON file te parse the data from");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON file", "*.json"));
-//        fileChooser.setInitialDirectory(new File(""));
-
-        classSelection.setCellFactory(lv -> new ListCell<ClassItem>() {
-            @Override
-            protected void updateItem(ClassItem item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item != null) {
-                    if (item.classSymbol != null) {
-                        ImageView imageView = new ImageView(item.classSymbol);
-                        imageView.setFitHeight(20);
-                        imageView.setFitWidth(20);
-                        setGraphic(imageView);
-                    }
-                    setText(item.className);
-                }
-
-
-            }
-        });
-        classSelection.setButtonCell(new ListCell<ClassItem>() {
-            @Override
-            protected void updateItem(ClassItem item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item != null) {
-                    if (item.classSymbol != null) {
-                        ImageView imageView = new ImageView(item.classSymbol);
-                        imageView.setFitHeight(20);
-                        imageView.setFitWidth(20);
-                        setGraphic(imageView);
-                    }
-                    setText(item.className);
-                }
-            }
-        });
-    }
+    private String fileDataJson;
+    private boolean dataFromGraph;
+    private ArrayList<XYChart.Series> classes;
+    private XYChart.Series unIdentifiedData, performanceData;
 
     void setNeuralNetwork(NeuralNetwork neuralNetwork) {
         this.neuralNetwork = neuralNetwork;
@@ -151,7 +83,7 @@ public class SecondaryController implements Initializable {
         this.doneTraining = false;
 
         // Can't enter data from graph
-        if(neuralNetwork.inputNeuronNumber != 2){
+        if (neuralNetwork.inputNeuronNumber != 2) {
             chart.setVisible(false);
             classSelection.setVisible(false);
             dataFromGraph = false;
@@ -160,7 +92,7 @@ public class SecondaryController implements Initializable {
         }
 
         //Initialize points classes
-        classes = new ArrayList<XYChart.Series>();
+        classes = new ArrayList<>();
         int outputsCount = neuralNetwork.outputNeuronNumber == 1 ? 2 : neuralNetwork.outputNeuronNumber;
         for (int i = 0; i < outputsCount; i++) {
             classes.add(new XYChart.Series());
@@ -174,7 +106,18 @@ public class SecondaryController implements Initializable {
         classSelection.setValue(classSelection.getItems().get(0));
     }
 
-    public void enterFileData(ActionEvent actionEvent) {
+    public void startTraining(ActionEvent actionEvent) {
+        if (!startedLearning) {
+            startedLearning = true;
+            if (dataFromGraph)
+                learnWithGraphData();
+            else
+                learnWithFileData();
+        }
+    }
+
+    @FXML
+    private void enterFileData(ActionEvent actionEvent) {
 
         File file = fileChooser.showOpenDialog(null);
         fileDataJson = "";
@@ -192,16 +135,6 @@ public class SecondaryController implements Initializable {
         dataFromGraph = false;
         chart.setOpacity(0.5);
         classSelection.setDisable(true);
-    }
-
-    public void startTraining(ActionEvent actionEvent) {
-        if (!startedLearning) {
-            startedLearning = true;
-            if (dataFromGraph)
-                learnWithGraphData();
-            else
-                learnWithFileData();
-        }
     }
 
     private void learnWithFileData() {
@@ -356,7 +289,7 @@ public class SecondaryController implements Initializable {
                                 double maxValue = Double.MIN_VALUE;
                                 for (int j = 0; j < predictedOutputs.length; j++) {
                                     double currentValue = predictedOutputs[j];
-                                    System.out.println("current value is: "+currentValue);
+                                    System.out.println("current value is: " + currentValue);
                                     if (currentValue > maxValue) {
                                         maxValue = currentValue;
                                         maxIndex = j;
@@ -382,8 +315,7 @@ public class SecondaryController implements Initializable {
                         double width = confusionPane.getWidth(), height = confusionPane.getHeight();
                         confusionPane.getChildren().removeIf((e) -> true);
                         double[] name = new double[outputsCount];
-                        for (int i=0;i< name.length;i++)
-                        {
+                        for (int i = 0; i < name.length; i++) {
                             name[i] = i;
                         }
 
@@ -410,9 +342,8 @@ public class SecondaryController implements Initializable {
 
     }
 
-
     public void addPoint(MouseEvent mouseEvent) {
-        if(!dataFromGraph)
+        if (!dataFromGraph)
             return;
 //        System.out.println("X axis is :" + mouseEvent.getX());
 //        System.out.println("Y axis is :" + mouseEvent.getY());
@@ -426,34 +357,6 @@ public class SecondaryController implements Initializable {
         } else if (mouseEvent.getButton() == MouseButton.SECONDARY)
             classes.get(1).getData().add(new XYChart.Data((mouseEvent.getX() - 36) / xAxis.getScale(), (mouseEvent.getY() - 281) / yAxis.getScale()));
         inputsCount++;
-    }
-
-    @FXML
-    void ssss(ActionEvent event) {
-        double width = confusionPane.getWidth(), height = confusionPane.getHeight();
-        confusionPane.getChildren().removeIf((e) -> true);
-        double[] name = {1, 2, 3};
-        int[] ac = {60, 105, 100};
-        int[][] con =
-                {
-                        {50, 10, 5},
-                        {5, 100, 2},
-                        {50, 90, 18},
-                };
-        FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(App.class.getResource("confusionMatrix.fxml"));
-        Parent newLoadedPane = null;
-
-        try {
-            newLoadedPane = loader.load();
-            ConfusionMatrixController matrix = loader.getController();
-            System.out.println(matrix);
-            matrix.setupMatrix(name, con, ac, width, height);
-            confusionPane.getChildren().add(newLoadedPane);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     @FXML
@@ -475,5 +378,71 @@ public class SecondaryController implements Initializable {
         }
     }
 
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        dataFromGraph = true;
+        unIdentifiedData = new XYChart.Series();
+        chart.getData().add(unIdentifiedData);
+
+        performanceData = new XYChart.Series();
+        performanceChart.getData().add(performanceData);
+
+        fileChooser = new FileChooser();
+        fileChooser.setTitle("Choose a JSON file te parse the data from");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON file", "*.json"));
+//        fileChooser.setInitialDirectory(new File(""));
+
+        classSelection.setCellFactory(lv -> new ListCell<ClassItem>() {
+            @Override
+            protected void updateItem(ClassItem item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item != null) {
+                    if (item.classSymbol != null) {
+                        ImageView imageView = new ImageView(item.classSymbol);
+                        imageView.setFitHeight(20);
+                        imageView.setFitWidth(20);
+                        setGraphic(imageView);
+                    }
+                    setText(item.className);
+                }
+
+
+            }
+        });
+        classSelection.setButtonCell(new ListCell<ClassItem>() {
+            @Override
+            protected void updateItem(ClassItem item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item != null) {
+                    if (item.classSymbol != null) {
+                        ImageView imageView = new ImageView(item.classSymbol);
+                        imageView.setFitHeight(20);
+                        imageView.setFitWidth(20);
+                        setGraphic(imageView);
+                    }
+                    setText(item.className);
+                }
+            }
+        });
+    }
+
+    private class ClassItem {
+        public String className;
+        public String symbolPath;
+        public Image classSymbol;
+        public int index;
+
+        public ClassItem(String className, String symbolPath, int index) {
+            this.className = className;
+            this.symbolPath = symbolPath;
+            this.index = index;
+            File file = new File(symbolPath);
+            try {
+                this.classSymbol = new Image(file.toURI().toURL().toString());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 }

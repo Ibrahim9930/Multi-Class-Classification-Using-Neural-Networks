@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.chart.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.ScatterChart?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 <AnchorPane id="background" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="675.0" prefWidth="1200.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.uousef.project.ai.SecondaryController">
    <children>
@@ -33,14 +40,10 @@
                         </Text>
                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                            <children>
-                              <Button fx:id="selectFile" mnemonicParsing="false" onAction="#enterFileData" styleClass="buttons" stylesheets="@style.css" text="Select File" textFill="WHITE">
-                                 <font>
-                                    <Font size="15.0" />
-                                 </font>
-                              </Button>
+                              <JFXButton fx:id="selectFile" onAction="#enterFileData" styleClass="buttons" stylesheets="@style.css" text="Select File" textFill="WHITE" />
+                              <ComboBox fx:id="classSelection" prefWidth="150.0" styleClass="filed" stylesheets="@style.css" />
                            </children>
                         </HBox>
-                        <ComboBox fx:id="classSelection" prefWidth="150.0" />
                         <ScatterChart fx:id="chart" alternativeRowFillVisible="false" animated="false" legendVisible="false" onMouseClicked="#addPoint" prefHeight="361.0" prefWidth="354.0" title="Input data points">
                            <xAxis>
                               <NumberAxis animated="false" autoRanging="false" tickLabelGap="10.0" tickUnit="1.0" upperBound="10.0" fx:id="xAxis" />
@@ -54,28 +57,37 @@
                         <Insets bottom="7.0" left="7.0" right="7.0" top="7.0" />
                      </padding>
                   </VBox>
-                  <VBox alignment="TOP_CENTER" prefHeight="505.0" prefWidth="368.0" spacing="10.0">
+                  <VBox prefHeight="505.0" prefWidth="368.0" spacing="10.0">
                      <children>
                         <Text fill="#0e2453" strokeType="OUTSIDE" strokeWidth="0.0" text="Training">
                            <font>
                               <Font name="System Bold" size="20.0" />
                            </font>
                            <VBox.margin>
-                              <Insets bottom="-3.0" />
+                              <Insets left="30.0" />
                            </VBox.margin>
                         </Text>
                         <Label fx:id="currentEpochLbl" text="Current Epoch: 0" textFill="#292929">
                            <font>
                               <Font name="SansSerif Regular" size="17.0" />
                            </font>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                           <padding>
+                              <Insets left="30.0" />
+                           </padding>
                         </Label>
                         <Label fx:id="MSE" text="Current MSE: 0" textFill="#0e2453">
                            <font>
                               <Font name="SansSerif Regular" size="17.0" />
                            </font>
                            <VBox.margin>
-                              <Insets bottom="75.0" top="-7.0" />
+                              <Insets top="-7.0" />
                            </VBox.margin>
+                           <padding>
+                              <Insets bottom="75.0" left="30.0" />
+                           </padding>
                         </Label>
                         <LineChart fx:id="performanceChart" createSymbols="false" legendVisible="false" prefHeight="361.0" prefWidth="354.0" title="MSE vs. Epoch Number">
                            <xAxis>
@@ -97,11 +109,7 @@
                         <Pane fx:id="confusionPane" prefHeight="360.0" prefWidth="360.0" />
                         <HBox alignment="CENTER_RIGHT" spacing="10.0">
                            <children>
-                              <Button fx:id="train" mnemonicParsing="false" onAction="#startTraining" prefHeight="47.0" prefWidth="118.0" styleClass="buttons" stylesheets="@style.css" text="Train" textFill="WHITE">
-                                 <font>
-                                    <Font name="System Bold" size="15.0" />
-                                 </font>
-                              </Button>
+                              <JFXButton fx:id="train" onAction="#startTraining" styleClass="buttons" stylesheets="@style.css" text="Train" textFill="WHITE" />
                               <JFXButton fx:id="back" onAction="#backHomePage" styleClass="buttons" stylesheets="@style.css" text="Go Back" textFill="WHITE" />
                            </children>
                            <padding>

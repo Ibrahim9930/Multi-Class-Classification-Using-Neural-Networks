@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
-
-import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXComboBox;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
@@ -29,30 +28,23 @@ import org.uousef.project.ai.modules.NeuralNetwork;
 
 public class PrimaryController implements Initializable {
 
-    @FXML
-    private Group group;
-    @FXML
-    private Pane neuralNetworkPane;
-    @FXML
-    private TextField textFieldInputNumber, textFieldOutputNumber,
+    @FXML private Group group;
+    @FXML private Pane neuralNetworkPane;
+    @FXML private JFXCheckBox adaptiveLearning;
+    @FXML private JFXComboBox<ActivationFunction> comboBoxOutputActivation, comboBoxActivationFunction;
+    @FXML private TextField textFieldInputNumber, textFieldOutputNumber,
             textFieldLearningRate, textFieldMaxEpoch,
             textFieldMSE, textFieldNeuronNo;
-    @FXML
-    private JFXButton buttonAddLayerButton, buttonRemoveLayer, buttonChooseDataset;
-    @FXML
-    private JFXComboBox<ActivationFunction> comboBoxOutputActivation, comboBoxActivationFunction;
-
-
 
     private ArrayList<LayerInformation> hiddenLayers;
     private int inputNeuronNumber = 2, outputNeuronNumber = 1, maxEpoch = 1000, neuronNumber = 1;
     private double learningRate = 0.1, acceptedMSE = 0.0001;
+    private boolean adaptiveLearningFlag = false;
 
     private void drawing() {
         ArrayList<Point2D>
                 previousNeurons = new ArrayList<>(),
                 currentNeurons = new ArrayList<>();
-
         double
                 width = neuralNetworkPane.widthProperty().get(),
                 height = neuralNetworkPane.heightProperty().get(),
@@ -90,7 +82,7 @@ public class PrimaryController implements Initializable {
                             previousNeurons.get(indexAtPreviousLayer).getX() + 20, previousNeurons.get(indexAtPreviousLayer).getY()));
                 }
             }
-            previousNeurons = (ArrayList<Point2D>) currentNeurons.clone();
+            previousNeurons = new ArrayList<>(currentNeurons);
             currentNeurons.clear();
         }
 
@@ -109,13 +101,13 @@ public class PrimaryController implements Initializable {
     }
 
     @FXML
-    void addLayer(ActionEvent event) {
+    void addLayer() {
         hiddenLayers.add(new LayerInformation(this.neuronNumber, this.comboBoxActivationFunction.getSelectionModel().getSelectedItem()));
         Platform.runLater(this::drawing);
     }
 
     @FXML
-    void removeLayer(ActionEvent event) {
+    void removeLayer() {
         try {
             hiddenLayers.remove(hiddenLayers.size() - 1);
         } catch (Exception e) {
@@ -126,7 +118,7 @@ public class PrimaryController implements Initializable {
 
     @FXML
     void chooseDatasetPage(ActionEvent event) {
-        ArrayList<LayerInformation> temp = (ArrayList<LayerInformation>) hiddenLayers.clone();
+        ArrayList<LayerInformation> temp = new ArrayList<>(hiddenLayers);
         temp.add(new LayerInformation(outputNeuronNumber, comboBoxOutputActivation.getSelectionModel().getSelectedItem()));
 
         try {
@@ -136,7 +128,7 @@ public class PrimaryController implements Initializable {
             Scene SecondaryScene = new Scene(secondaryParent);
 
             SecondaryController secondaryController = loader.getController();
-            secondaryController.setNeuralNetwork(new NeuralNetwork(temp, learningRate, acceptedMSE, inputNeuronNumber,maxEpoch));
+            secondaryController.setNeuralNetwork(new NeuralNetwork(temp, learningRate, acceptedMSE, inputNeuronNumber, maxEpoch,adaptiveLearningFlag));
             System.gc();
 
             Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -147,6 +139,11 @@ public class PrimaryController implements Initializable {
             e.printStackTrace();
         }
 
+    }
+
+    @FXML
+    void adaptiveLearningChanged() {
+        adaptiveLearningFlag = adaptiveLearning.isSelected();
     }
 
     private int checkIfInteger(String number) {
@@ -161,12 +158,13 @@ public class PrimaryController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         hiddenLayers = new ArrayList<>();
 
+
         textFieldInputNumber.textProperty().addListener((obs, oldValue, newValue) -> {
             int temp = checkIfInteger(newValue);
             if ((temp > 0)) {
                 inputNeuronNumber = temp;
             } else {
-                inputNeuronNumber = 1;
+                inputNeuronNumber = 2;
                 textFieldInputNumber.setText("");
             }
             Platform.runLater(this::drawing);
@@ -184,7 +182,7 @@ public class PrimaryController implements Initializable {
         });
 
         comboBoxOutputActivation.getItems().addAll(ActivationFunction.TANH,
-                ActivationFunction.SIGMOID, ActivationFunction.SOFTMAX);
+                ActivationFunction.SIGMOID);//, ActivationFunction.SOFTMAX);
         comboBoxOutputActivation.getSelectionModel().select(0);
 
         textFieldLearningRate.textProperty().addListener((obs, oldValue, newValue) -> {
