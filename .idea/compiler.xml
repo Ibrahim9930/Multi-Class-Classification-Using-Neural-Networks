@@ -6,9 +6,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="ai.sec.project" />
         <module name="Binary-Classification-Using-Neural-Networks" />
         <module name="aiSecondProject" />
+        <module name="ai.sec.project" />
       </profile>
     </annotationProcessing>
   </component>

@@ -398,9 +398,9 @@ public class SecondaryController implements Initializable {
         if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             ClassItem currentItem = (ClassItem) classSelection.getValue();
             int index = currentItem.index;
-            classes.get(index).getData().add(new XYChart.Data((mouseEvent.getX() - 36.6) / xAxis.getScale(), (mouseEvent.getY() - 353) / yAxis.getScale()));
+            classes.get(index).getData().add(new XYChart.Data((mouseEvent.getX() - 36) / xAxis.getScale(), (mouseEvent.getY() - 281) / yAxis.getScale()));
         } else if (mouseEvent.getButton() == MouseButton.SECONDARY)
-            classes.get(1).getData().add(new XYChart.Data((mouseEvent.getX() - 36.6) / xAxis.getScale(), (mouseEvent.getY() - 353) / yAxis.getScale()));
+            classes.get(1).getData().add(new XYChart.Data((mouseEvent.getX() - 36) / xAxis.getScale(), (mouseEvent.getY() - 281) / yAxis.getScale()));
         inputsCount++;
     }
 
