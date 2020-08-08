@@ -231,16 +231,16 @@ public class SecondaryController implements Initializable {
                 outputData[i][j] = tempValue.doubleValue();
             }
         }
-        for (int i = 0; i < inputData.length; i++) {
-            System.out.println();
-            for (int j = 0; j < inputData[i].length; j++)
-                System.out.print(inputData[i][j] + "\t");
-        }
-        for (int i = 0; i < outputData.length; i++) {
-            System.out.println();
-            for (int j = 0; j < outputData[i].length; j++)
-                System.out.print(outputData[i][j] + "\t");
-        }
+//        for (int i = 0; i < inputData.length; i++) {
+//            System.out.println();
+//            for (int j = 0; j < inputData[i].length; j++)
+//                System.out.print(inputData[i][j] + "\t");
+//        }
+//        for (int i = 0; i < outputData.length; i++) {
+//            System.out.println();
+//            for (int j = 0; j < outputData[i].length; j++)
+//                System.out.print(outputData[i][j] + "\t");
+//        }
         long t = System.currentTimeMillis();
         new Thread(() -> {
             neuralNetwork.training(inputData, outputData, () -> Platform.runLater(() -> {
@@ -356,13 +356,12 @@ public class SecondaryController implements Initializable {
                                 double maxValue = Double.MIN_VALUE;
                                 for (int j = 0; j < predictedOutputs.length; j++) {
                                     double currentValue = predictedOutputs[j];
-                                    System.out.println("current value is: "+currentValue);
                                     if (currentValue > maxValue) {
                                         maxValue = currentValue;
                                         maxIndex = j;
                                     }
                                 }
-//                                classes.get(maxIndex).getData().add(point);
+                                classes.get(maxIndex).getData().add(point);
                                 col = maxIndex;
                                 maxIndex = -1;
                                 maxValue = Double.MIN_VALUE;
@@ -394,7 +393,7 @@ public class SecondaryController implements Initializable {
                         try {
                             newLoadedPane = loader.load();
                             ConfusionMatrixController matrix = loader.getController();
-                            System.out.println(matrix);
+//                            System.out.println(matrix);
                             matrix.setupMatrix(name, confusionMatrix, classesCount, width, height);
                             confusionPane.getChildren().add(newLoadedPane);
                         } catch (IOException e) {
