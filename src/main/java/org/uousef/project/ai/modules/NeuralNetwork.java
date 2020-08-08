@@ -138,7 +138,16 @@ public class NeuralNetwork {
     public void training(double[][] inputData, double[][] outputData, CallBack updateMES, CallBack doneLearning) {
         int iterationIndex, epochIndex;
         double tempMSE;
-
+        for (int i=0;i<inputData.length;i++) {
+            System.out.println();
+            for (int j = 0; j < inputData[i].length; j++)
+                System.out.print(inputData[i][j]+"\t");
+        }
+        for (int i=0;i<outputData.length;i++) {
+            System.out.println();
+            for (int j = 0; j < outputData[i].length; j++)
+                System.out.print(outputData[i][j]+"\t");
+        }
         for (epochIndex = 0; epochIndex < epochMax; epochIndex++) {
             tempMSE = 0.0;
             for (iterationIndex = 0; iterationIndex < inputData.length; iterationIndex++) {
@@ -152,14 +161,13 @@ public class NeuralNetwork {
                 learningRate *= 1.05;
             else if (adaptiveLearning)
                 learningRate *= 0.7;
-
-            if (Math.abs(tempMSE - currentMES) > 0.01) {
+            if(Math.abs(tempMSE-currentMES)>0.01){
                 currentMES = tempMSE;
+                currentEpoch = epochIndex;
                 updateMES.Callback();
             }
             currentMES = tempMSE;
             currentEpoch = epochIndex;
-
             if (acceptedMSE >= tempMSE) {
                 updateMES.Callback();
                 doneLearning.Callback();
