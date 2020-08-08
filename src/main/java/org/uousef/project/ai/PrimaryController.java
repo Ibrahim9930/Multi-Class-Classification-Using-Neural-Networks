@@ -37,7 +37,7 @@ public class PrimaryController implements Initializable {
             textFieldMSE, textFieldNeuronNo;
 
     private ArrayList<LayerInformation> hiddenLayers;
-    private int inputNeuronNumber = 2, outputNeuronNumber = 1, maxEpoch = 1000, neuronNumber = 1;
+    private int inputNeuronNumber = 2, outputNeuronNumber = 1, maxEpoch = 10000, neuronNumber = 1;
     private double learningRate = 0.1, acceptedMSE = 0.0001;
     private boolean adaptiveLearningFlag = false;
 
