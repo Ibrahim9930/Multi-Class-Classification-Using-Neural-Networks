@@ -134,7 +134,7 @@ public class NeuralNetwork {
 
     public void training(double[][] inputData, double[][] outputData, CallBack updateMES, CallBack doneLearning) {
         int iterationIndex, epochIndex;
-        double tempMSE;
+        double tempMSE,lastMSE = 0;
 
         for (epochIndex = 0; epochIndex < epochMax; epochIndex++) {
             tempMSE = 0.0;
@@ -150,13 +150,13 @@ public class NeuralNetwork {
             else if (adaptiveLearning)
                 learningRate *= 0.7;
 
-            if (Math.abs(tempMSE - currentMSE) > 0.01) {
+            if (Math.abs(lastMSE - currentMSE) > 0.005) {
                 currentMSE = tempMSE;
+                lastMSE = tempMSE;
                 updateMES.Callback();
             }
             currentMSE = tempMSE;
             currentEpoch = epochIndex;
-
             if (acceptedMSE >= tempMSE) {
                 updateMES.Callback();
                 doneLearning.Callback();
