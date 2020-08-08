@@ -263,9 +263,9 @@ public class SecondaryController implements Initializable {
         long t = System.currentTimeMillis();
         new Thread(() -> {
             neuralNetwork.training(inputData, outputData, () -> Platform.runLater(() -> {
-                MSE.setText(String.format("Current MSE: %.5f", neuralNetwork.currentMES));
+                MSE.setText(String.format("Current MSE: %.5f", neuralNetwork.currentMSE));
                 currentEpochLbl.setText(String.format("Current Epoch: %s", neuralNetwork.currentEpoch));
-                performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMES));
+                performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMSE));
             }), () -> {
 
                 //This function shows final classification on the GUI
@@ -345,12 +345,7 @@ public class SecondaryController implements Initializable {
         JSONArray tempInputArray = (JSONArray) tempObject.get("input");
         JSONArray tempOutputArray = (JSONArray) tempObject.get("output");
         int outputsCount = neuralNetwork.outputNeuronNumber == 1 ? 2 : neuralNetwork.outputNeuronNumber;
-        System.out.println("input size is : " + tempInputArray.size());
-        System.out.println("output size is: " + tempOutputArray.size());
-        System.out.println(neuralNetwork.inputNeuronNumber);
-        System.out.println(outputsCount);
         if (tempInputArray.size() != neuralNetwork.inputNeuronNumber || tempOutputArray.size() != neuralNetwork.outputNeuronNumber) {
-            System.out.println("in");
             return;
         }
         inputData = new double[data.size()][tempInputArray.size()];
@@ -376,9 +371,9 @@ public class SecondaryController implements Initializable {
         long t = System.currentTimeMillis();
         new Thread(() -> {
             neuralNetwork.training(inputData, outputData, () -> Platform.runLater(() -> {
-                MSE.setText(String.format("Current MSE: %.5f", neuralNetwork.currentMES));
+                MSE.setText(String.format("Current MSE: %.5f", neuralNetwork.currentMSE));
                 currentEpochLbl.setText(String.format("Current Epoch: %s", neuralNetwork.currentEpoch));
-                performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMES));
+                performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMSE));
             }), () -> {
 
                 //This function shows final classification on the GUI
@@ -425,12 +420,9 @@ public class SecondaryController implements Initializable {
                         row = actualOutputsIndecies[i];
                         classesCount[col]++;
                     }
-                    System.out.println("here");
                     confusionMatrix[row][col]++;
                 }
-                for (int i = 0; i < confusionMatrix.length; i++)
-                    for (int j = 0; j < confusionMatrix[i].length; j++)
-                        System.out.println("element " + i + "," + j + " : " + confusionMatrix[i][j]);
+
                 Platform.runLater(() -> updateScatterPlotAndMatrix(confusionMatrix, classesCount, false));
             });
             System.out.println("Time the operation took in milliseconds : " + (System.currentTimeMillis() - t));
@@ -442,17 +434,12 @@ public class SecondaryController implements Initializable {
     public void addPoint(MouseEvent mouseEvent) {
         if (!dataFromGraph)
             return;
-//        System.out.println("X axis is :" + mouseEvent.getX());
-//        System.out.println("Y axis is :" + mouseEvent.getY());
-//        System.out.println("Chart width is :" + chart.getPrefWidth());
-//        System.out.println("Chart height is :" + chart.getPrefHeight());
-
         if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             ClassItem currentItem = (ClassItem) classSelection.getValue();
             int index = currentItem.index;
-            classes.get(index).getData().add(new XYChart.Data((mouseEvent.getX() - 36) / xAxis.getScale(), (mouseEvent.getY() - 281) / yAxis.getScale()));
+            classes.get(index).getData().add(new XYChart.Data((mouseEvent.getX() - 36) / xAxis.getScale(), (mouseEvent.getY() - 310) / yAxis.getScale()));
         } else if (mouseEvent.getButton() == MouseButton.SECONDARY)
-            classes.get(1).getData().add(new XYChart.Data((mouseEvent.getX() - 36) / xAxis.getScale(), (mouseEvent.getY() - 281) / yAxis.getScale()));
+            classes.get(1).getData().add(new XYChart.Data((mouseEvent.getX() - 36) / xAxis.getScale(), (mouseEvent.getY() - 310) / yAxis.getScale()));
         inputsCount++;
     }
 
