@@ -42,7 +42,7 @@ public class ConfusionMatrixController implements Initializable {
                     continue;
                 else if (indexRows == 0) {
                     temp = (char) (temp + (int) className[indexColumn - 1]);
-                    matrixElement.setupString("Class " + temp, predicted[indexColumn - 1]+90, size);
+                    matrixElement.setupString("Class " + temp, predicted[indexColumn - 1], size);
                 } else if (indexColumn == 0) {
                     temp = (char) (temp + (int) className[indexRows - 1]);
                     matrixElement.setupString("Class " + temp, actual, size);
