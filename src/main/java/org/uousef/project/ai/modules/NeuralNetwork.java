@@ -8,7 +8,7 @@ public class NeuralNetwork {
     public double[][][] weights, weightCorrections;
     public double[][] thresholds, nodeOutputs;
     public double learningRate, acceptedMSE, currentMES;
-    public int inputNeuronNumber, outputNeuronNumber,epochMax;
+    public int inputNeuronNumber, outputNeuronNumber, epochMax;
     public int currentEpoch;
     private double[] softMaxInput;
     //Contains weights of hidden layers and outputs
@@ -22,7 +22,7 @@ public class NeuralNetwork {
         this.layersInformation = layersInformation;
         softMaxInput = (layersInformation.get(layersInformation.size() - 1).activationFunction == ActivationFunction.SOFTMAX)
                 ? softMaxInput = new double[layersInformation.get(layersInformation.size() - 1).neuronNumber] : null;
-        this.outputNeuronNumber = layersInformation.get(layersInformation.size()-1).neuronNumber;
+        this.outputNeuronNumber = layersInformation.get(layersInformation.size() - 1).neuronNumber;
         initializeNeuralNetwork();
     }
 
@@ -86,7 +86,8 @@ public class NeuralNetwork {
             }
             //check if its the output layer and use softmax
             if (indexLayer + 1 == weights.length && layersInformation.get(indexLayer).activationFunction == ActivationFunction.SOFTMAX) {
-                softMaxInput = nodeOutputs[indexLayer].clone();
+//                softMaxInput = nodeOutputs[indexLayer].clone();
+
                 expSum = DoubleStream.of(nodeOutputs[indexLayer]).sum();
                 for (indexNeuron = 0; indexNeuron < weights[indexLayer].length; indexNeuron++) {
                     nodeOutputs[indexLayer][indexNeuron] /= expSum;
@@ -104,18 +105,19 @@ public class NeuralNetwork {
         for (indexLayer = weights.length - 1; indexLayer >= 0; indexLayer--) {
             for (indexNode = 0; indexNode < weights[indexLayer].length; indexNode++) {
                 if (indexLayer == weights.length - 1) {
-                    error = (layersInformation.get(layersInformation.size()-1).activationFunction != ActivationFunction.SOFTMAX)
+                    error = (layersInformation.get(layersInformation.size() - 1).activationFunction != ActivationFunction.SOFTMAX)
                             ? finalOutputs[indexNode] - nodeOutputs[weights.length - 1][indexNode]
-                            : finalOutputs[indexNode] * Math.log(nodeOutputs[weights.length - 1][indexNode])/Math.log(2);
+                            : finalOutputs[indexNode] - nodeOutputs[weights.length - 1][indexNode];
+//                            : -1 * (finalOutputs[indexNode] * Math.log(nodeOutputs[weights.length - 1][indexNode]) / Math.log(2));
 
-                    gradient = error * computeDerivative(nodeOutputs[weights.length - 1][indexNode], weights.length - 1,indexNode);
+                    gradient = error * computeDerivative(nodeOutputs[weights.length - 1][indexNode], weights.length - 1, indexNode);
                     gradient1.add(gradient);
                 } else {
                     gradient = 0;
                     for (indexWeight = 0; indexWeight < gradient2.size(); indexWeight++) {
                         gradient += (gradient2.get(indexWeight) * weights[indexLayer + 1][indexWeight][indexNode]);
                     }
-                    gradient *= computeDerivative( nodeOutputs[indexLayer][indexNode], indexLayer,indexNode);
+                    gradient *= computeDerivative(nodeOutputs[indexLayer][indexNode], indexLayer, indexNode);
                     gradient1.add(gradient);
                 }
 //                thresholds[indexLayer][indexNode] += learningRate * thresholds[indexLayer][indexNode] * gradient;
@@ -146,7 +148,7 @@ public class NeuralNetwork {
             // Nodes loop
             for (int j = 0; j < weights[i].length; j++) {
                 double gradientFactor = 0;
-                double gradientValue = computeDerivative(nodeOutputs[i][j], i,j);
+                double gradientValue = computeDerivative(nodeOutputs[i][j], i, j);
                 if (i != weights.length - 1) {
 
                     for (int k = 0; k < weights[i + 1].length; k++) {
@@ -181,7 +183,6 @@ public class NeuralNetwork {
     private double computeNeuronOutput(double inputValue, int indexLayer) {
         switch (layersInformation.get(indexLayer).activationFunction) {
             case LINEAR:
-            case SOFTMAX: //soft max need another step to compute the result
                 return inputValue;
             case ReLU:
                 return (inputValue >= 0 ? inputValue : 0);
@@ -189,12 +190,14 @@ public class NeuralNetwork {
                 return (2.0 / (1 + Math.exp(-2 * inputValue))) - 1.0;
             case SIGMOID:
                 return (1.0 / (1 + Math.exp(-1 * inputValue)));
+            case SOFTMAX: //soft max need another step to compute the result
+                return Math.exp(inputValue);
             default:
                 throw new IllegalStateException("Unexpected value: " + layersInformation.get(indexLayer).activationFunction);
         }
     }
 
-    private double computeDerivative( double outputValue, int indexLayer,int neuronNumber) {
+    private double computeDerivative(double outputValue, int indexLayer, int neuronNumber) {
         switch (layersInformation.get(indexLayer).activationFunction) {
             case TANH:
                 return 1.0 - Math.pow(outputValue, 2.0);
@@ -205,6 +208,7 @@ public class NeuralNetwork {
             case LINEAR:
                 return 1.0;
             case SOFTMAX:
+//                return 1.0;
                 return outputValue - this.nodeOutputs[nodeOutputs.length - 1][neuronNumber];
             default:
                 throw new IllegalStateException("Unexpected value: " + layersInformation.get(indexLayer).activationFunction);
@@ -231,7 +235,7 @@ public class NeuralNetwork {
                 feeding(inputData[iterationIndex]);
                 testBack(inputData[iterationIndex], outputData[iterationIndex]);
                 tempMSE += firstStepOfMSE(outputData[iterationIndex], nodeOutputs[nodeOutputs.length - 1]);
-//                System.out.println("input: " + inputData[iterationIndex][0] + ":" + inputData[iterationIndex][1] + " result: " + nodeOutputs[nodeOutputs.length - 1][0]+"output: "+outputData[iterationIndex][0]);
+                System.out.println("input: " + inputData[iterationIndex][0] + ":" + inputData[iterationIndex][1] + " result: " + nodeOutputs[nodeOutputs.length - 1][0] + "output: " + outputData[iterationIndex][0]);
             }
             tempMSE = tempMSE / (double) inputData.length;
             if (Math.abs(tempMSE - currentMES) > 0.01) {
