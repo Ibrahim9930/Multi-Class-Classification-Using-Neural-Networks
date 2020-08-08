@@ -80,7 +80,7 @@
                               <Font name="SansSerif Regular" size="17.0" />
                            </font>
                            <VBox.margin>
-                              <Insets top="-7.0" />
+                              <Insets bottom="45.0" top="-7.0" />
                            </VBox.margin>
                         </Label>
                         <LineChart fx:id="performanceChart" createSymbols="false" legendVisible="false" prefHeight="361.0" prefWidth="354.0" title="MSE vs. Epoch Number">
@@ -95,7 +95,7 @@
                      <padding>
                         <Insets right="7.0" top="7.0" />
                      </padding></VBox>
-                  <VBox alignment="BOTTOM_CENTER" prefHeight="505.0" prefWidth="369.0" spacing="10.0">
+                  <VBox alignment="BOTTOM_CENTER" prefHeight="505.0" prefWidth="369.0" spacing="15.0">
                      <children>
                         <Pane fx:id="confusionPane" prefHeight="360.0" prefWidth="360.0" />
                         <HBox alignment="CENTER_RIGHT" spacing="10.0">
