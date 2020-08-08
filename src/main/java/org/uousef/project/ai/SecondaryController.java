@@ -177,9 +177,9 @@ public class SecondaryController implements Initializable {
         long t = System.currentTimeMillis();
         new Thread(() -> {
             neuralNetwork.training(inputData, outputData, () -> Platform.runLater(() -> {
-                        MSE.setText(String.format("Current MSE: %.5f", neuralNetwork.currentMES));
+                        MSE.setText(String.format("Current MSE: %.5f", neuralNetwork.currentMSE));
                         currentEpochLbl.setText(String.format("Current Epoch: %s", neuralNetwork.currentEpoch));
-                        performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMES));
+                        performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMSE));
                     }), () -> {
                     }
             );
@@ -243,9 +243,9 @@ public class SecondaryController implements Initializable {
         long t = System.currentTimeMillis();
         new Thread(() -> {
             neuralNetwork.training(inputData, outputData, () -> Platform.runLater(() -> {
-                        MSE.setText(String.format("Current MSE: %.5f", neuralNetwork.currentMES));
+                        MSE.setText(String.format("Current MSE: %.5f", neuralNetwork.currentMSE));
                         currentEpochLbl.setText(String.format("Current Epoch: %s", neuralNetwork.currentEpoch));
-                        performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMES));
+                        performanceData.getData().add(new XYChart.Data(neuralNetwork.currentEpoch, neuralNetwork.currentMSE));
                     }), () -> Platform.runLater(() -> {
                         //This function shows final classification on the GUI
                         int[][] confusionMatrix = new int[outputsCount][];

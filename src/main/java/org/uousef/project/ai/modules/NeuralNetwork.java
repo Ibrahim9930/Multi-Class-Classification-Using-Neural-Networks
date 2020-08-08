@@ -5,13 +5,12 @@ import java.util.stream.DoubleStream;
 
 public class NeuralNetwork {
 
+    private ArrayList<LayerInformation> layersInformation;
     private double[][][] weights, weightCorrections;
     private double[][] thresholds, nodeOutputs;
-    public double learningRate, acceptedMSE, currentMES;
-    public int inputNeuronNumber, outputNeuronNumber, epochMax;
-    public int currentEpoch;
-    private double[] softMaxInput;
-    private ArrayList<LayerInformation> layersInformation;
+    public double learningRate, acceptedMSE, currentMSE;
+    public int inputNeuronNumber, outputNeuronNumber, epochMax, currentEpoch;
+
     private boolean adaptiveLearning;
 
     public NeuralNetwork(ArrayList<LayerInformation> layersInformation, double learningRate, double acceptedMSE, int inputNeuronNumber, int epochMax, boolean adaptiveLearning) {
@@ -21,8 +20,6 @@ public class NeuralNetwork {
         this.inputNeuronNumber = inputNeuronNumber;
         this.layersInformation = layersInformation;
         this.adaptiveLearning = adaptiveLearning;
-        softMaxInput = (layersInformation.get(layersInformation.size() - 1).activationFunction == ActivationFunction.SOFTMAX)
-                ? softMaxInput = new double[layersInformation.get(layersInformation.size() - 1).neuronNumber] : null;
         this.outputNeuronNumber = layersInformation.get(layersInformation.size() - 1).neuronNumber;
         initializeNeuralNetwork();
     }
@@ -148,16 +145,16 @@ public class NeuralNetwork {
             }
             tempMSE = tempMSE / (double) inputData.length;
 
-            if (adaptiveLearning && tempMSE < currentMES)
+            if (adaptiveLearning && tempMSE < currentMSE)
                 learningRate *= 1.05;
             else if (adaptiveLearning)
                 learningRate *= 0.7;
 
-            if (Math.abs(tempMSE - currentMES) > 0.01) {
-                currentMES = tempMSE;
+            if (Math.abs(tempMSE - currentMSE) > 0.01) {
+                currentMSE = tempMSE;
                 updateMES.Callback();
             }
-            currentMES = tempMSE;
+            currentMSE = tempMSE;
             currentEpoch = epochIndex;
 
             if (acceptedMSE >= tempMSE) {
@@ -218,6 +215,22 @@ public class NeuralNetwork {
             default:
                 throw new IllegalStateException("Unexpected value: " + layersInformation.get(indexLayer).activationFunction);
         }
+    }
+
+    public double getCurrentMSE() {
+        return currentMSE;
+    }
+
+    public int getInputNeuronNumber() {
+        return inputNeuronNumber;
+    }
+
+    public int getOutputNeuronNumber() {
+        return outputNeuronNumber;
+    }
+
+    public int getCurrentEpoch() {
+        return currentEpoch;
     }
 
     @Override
