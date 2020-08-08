@@ -76,7 +76,7 @@ public class SecondaryController implements Initializable {
     private String fileDataJson;
     private boolean dataFromGraph;
     private ArrayList<XYChart.Series> classes, temps;
-    private XYChart.Series unIdentifiedData, performanceData, tempPerformanceData;
+    private XYChart.Series unIdentifiedData, performanceData;
 
     private class ClassItem {
         public String className;
@@ -259,7 +259,6 @@ public class SecondaryController implements Initializable {
         }
 
         unIdentifiedData.getData().setAll(tempUnidentifiedSeries.getData());
-        tempPerformanceData = new XYChart.Series();
         long t = System.currentTimeMillis();
         new Thread(() -> {
             neuralNetwork.training(inputData, outputData, () -> Platform.runLater(() -> {
