@@ -319,7 +319,7 @@ public class SecondaryController implements Initializable {
                         col = maxIndex;
 
                         row = actualOutputsIndecies[i];
-                        classesCount[row]++;
+                        classesCount[col]++;
                     }
                     confusionMatrix[row][col]++;
                 }

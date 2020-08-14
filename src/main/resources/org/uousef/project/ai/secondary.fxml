@@ -27,7 +27,7 @@
                      <children>
                         <Text fill="#0e2453" strokeType="OUTSIDE" strokeWidth="0.0" text="Dataset">
                            <font>
-                              <Font name="System Bold" size="20.0" />
+                              <Font name="SansSerif Bold" size="20.0" />
                            </font>
                            <VBox.margin>
                               <Insets bottom="-3.0" />
@@ -61,7 +61,7 @@
                      <children>
                         <Text fill="#0e2453" strokeType="OUTSIDE" strokeWidth="0.0" text="Training">
                            <font>
-                              <Font name="System Bold" size="20.0" />
+                              <Font name="SansSerif Bold" size="20.0" />
                            </font>
                            <VBox.margin>
                               <Insets left="30.0" />

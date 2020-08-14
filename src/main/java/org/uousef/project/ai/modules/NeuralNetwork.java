@@ -113,8 +113,8 @@ public class NeuralNetwork {
                     gradient *= computeDerivative(nodeOutputs[indexLayer][indexNode], indexLayer, indexNode);
                     gradient1.add(gradient);
                 }
-//                thresholds[indexLayer][indexNode] += learningRate * thresholds[indexLayer][indexNode] * gradient;
-                thresholds[indexLayer][indexNode] += learningRate * -1 * gradient;
+                thresholds[indexLayer][indexNode] += learningRate * thresholds[indexLayer][indexNode] * gradient;
+//                thresholds[indexLayer][indexNode] += learningRate * -1 * gradient;
             }
 
             gradient2 = new ArrayList<>(gradient1);
@@ -150,7 +150,7 @@ public class NeuralNetwork {
             else if (adaptiveLearning)
                 learningRate *= 0.7;
 
-            if (epochIndex - lastEpoch > 200 || Math.abs(lastMSE - currentMSE) > 0.005) {
+            if (epochIndex - lastEpoch > 100 || Math.abs(lastMSE - currentMSE) > 0.005) {
                 currentMSE = tempMSE;
                 lastMSE = tempMSE;
                 lastEpoch = epochIndex;
